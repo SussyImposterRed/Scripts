@@ -1,0 +1,124 @@
+local camera = workspace.CurrentCamera;
+local players = game:GetService("Players");
+local localPlayer = players.LocalPlayer;
+
+
+local charTbl;
+local replicationTbl;
+local pfCam;
+local gameLogic;
+local network;
+local hud;
+local char;
+local menu;
+
+for i,v in pairs(getgc(true)) do
+   if type(v) == "table" then
+       if rawget(v, "getbodyparts") then
+           replicationTbl = v;
+           charTbl = debug.getupvalue(v.getbodyparts, 1);
+       end
+       if rawget(v, "basecframe") then
+           pfCam = v;
+       end
+       if rawget(v, "gammo") then
+           gameLogic = v;
+       end
+       if rawget(v, "send") then
+           network = v;
+       end
+       if rawget(v, "updateammo") then
+           hud = v;
+       end
+       if rawget(v, "jump") then
+           char = v;
+       end
+       if rawget(v, "isdeployed") then
+           menu = v;
+       end
+   end
+end
+
+
+local function shootNade(targetPos)
+   if gameLogic.gammo <= 0 then
+       return;
+   end
+   local camCf = camera.CFrame;
+   local rot = (camCf - camCf.Position);
+   local args = {
+       time = tick(),
+       blowuptime = 0,
+       frames = {
+           {
+               t0 = 0,
+               p0 = camCf.Position,
+               v0 = camCf.LookVector,
+               offset = Vector3.new(),
+               a = Vector3.new(0, -80,0),
+               rot0 = rot,
+               rotv = rot * Vector3.new(19, -5, 0),
+               glassbreaks = {}
+           },
+           {
+               t0 = 0,
+               p0 = targetPos,
+               v0 = Vector3.new(),
+               offset = Vector3.new(),
+               a = Vector3.new(),
+               rot0 = CFrame.new(),
+               rotv = Vector3.new(),
+               glassbreaks = {}
+           }
+       }
+   };
+   network:send("newgrenade", "FRAG", args);
+   gameLogic.gammo = gameLogic.gammo - 1;
+   hud:updateammo("GRENADE");
+end
+
+local function getCharacterInCircle(center, radius)
+   local results = {};
+   for player, character in pairs(charTbl) do
+       if player.Team ~= localPlayer.Team then
+           if character.rootpart and (character.rootpart.Position - center).Magnitude <= radius then
+               results[#results + 1] = character;
+           end
+       end
+   end
+   return results;
+end
+
+do
+   if not (char.rootpart and menu:isdeployed()) then
+       repeat
+           menu:deploy();
+           task.wait();
+       until char.rootpart and menu:isdeployed();
+   end
+   task.wait(1);
+   local targets = {};
+   for player, character in pairs(charTbl) do
+       if player.Team ~= localPlayer.Team then
+           if character.rootpart and character.torso and character.head then
+               local charsInCircle = getCharacterInCircle(character.torso.Position, 30);
+               targets[#targets + 1] = charsInCircle;
+           end
+       end
+   end
+   table.sort(targets, function(a, b)
+       return #a > #b;
+   end);
+   for i = 1, 3 do
+       local t = targets[i];
+       if t then
+           for j = 1, #t do
+               local theirChar = t[j];
+               if theirChar and theirChar.torso then
+                   shootNade(theirChar.torso.Position);
+                   task.wait(0.1);
+               end
+           end
+       end
+   end
+end
