@@ -344,6 +344,7 @@ Section2:CreateTextBox("Blacklist Player", "Blacklist Someone", false, function(
 	table.insert(_G.blocklist, getplayer(String))
 end)
 Section2:CreateTextBox("Remove blacklist from player", "Remove blacklist from someone", false, function(String)
+ chat("Successfully removed blacklisted from "..getplayer(String).." uwu (Bot developed by len)")
 	table.remove(_G.blocklist, tablefind(_G.bloacklist, getplayer(String)))
 end)
 local Button8 = Section1:CreateButton("Save custom insults", function()
