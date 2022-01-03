@@ -100,16 +100,19 @@ end
 
 commands.help = function()
     chat(_G.prefix.."removepassive [user], Removes someone from passive | ".._G.prefix.."givepassive [user], Adds someone to passive | ".._G.prefix.."insult [user], Insults someone | ".._G.prefix.."verse, Study bible")
-    wait(.5)
+    wait(2)
+    chat(_G.prefix.."Reminder : This is automated")
 end
 
 getVerse = function()
     local response = HttpService:JSONDecode(game:HttpGet("http://labs.bible.org/api/?passage=random&type=json"))
+    
     return response[1].bookname .. " " .. response[1].chapter .. ":" .. response[1].verse .. " " .. response[1].text
 end
 
 commands.verse = function()
     local bible = getVerse()
+    print(bible)
     if string.len(bible) > 200 then
         repeat
             game:GetService("RunService").Heartbeat:Wait()
