@@ -95,7 +95,7 @@ commands.removepassive = function(player)
     if player == "coI0e" then chat("Woah no. ❌")  return end
     
     chat("Removed passive from "..player.. "✅")
-    table.remove(passive, tablefind(_G.passive, player))
+    table.remove(_G.passive, tablefind(_G.passive, player))
 end
 
 commands.help = function()
@@ -262,6 +262,7 @@ end)
 Toggle1:AddToolTip("Toggle Advertisement")
 Slider1:SetValue(30)
 Section1:CreateTextBox("Prefix", "Set prefix", false, function(String)
+    chat("Prefix changed to "..String.." ✅")
 	_G.prefix = String
 end)
 Section1:CreateTextBox("Add Custom Insults", "Add Insults", false, function(String)
@@ -273,11 +274,11 @@ local Toggle7 = Section1:CreateToggle("Disable bot", false, function(State)
 end)
 Toggle7:AddToolTip("Disable")
 Section2:CreateTextBox("Blacklist Player", "Blacklist Someone", false, function(String)
-    
-	table.insert(_G.blacklist, getplayer(String))
+    print(getplayer(String))
+	table.insert(_G.blocklist, getplayer(String))
 end)
 Section2:CreateTextBox("Remove blacklist from player", "Remove blacklist from someone", false, function(String)
-	table.remove(_G.blacklist, tablefind(_G.blacklist, getplayer(String)))
+	table.remove(_G.blocklist, tablefind(_G.bloacklist, getplayer(String)))
 end)
 local Button8 = Section1:CreateButton("Save custom insults", function()
         writefile("InsultBotSaves.txt", HttpService:JSONEncode(_G.custominsults))
