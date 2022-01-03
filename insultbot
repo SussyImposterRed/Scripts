@@ -235,7 +235,7 @@ end
 
 game.Players.PlayerAdded:Connect(function(p)
     if _G.greetings then
-    chat("Hey! "..p.Name..", Say ".._G.prefix.."help for insult bot commands!")
+    chat("Hey! "..p.DisplayName..", Say ".._G.prefix.."help for insult bot commands!")
     end
 end)
 
