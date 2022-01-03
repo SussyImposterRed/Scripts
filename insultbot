@@ -1,0 +1,308 @@
+if _G.Executed == true then return end
+_G.Executed = true
+local HttpService = game:GetService("HttpService")
+
+Disabled = false
+
+function tablefind(tab,el)
+for index, value in pairs(tab) do
+	if value == el then
+	      return index
+	   end
+    end
+end
+
+function getplayer(name)
+    local shortName = name -- short name the player provided
+    shortName = string.lower(shortName) -- we are turning everything to lowercase so players dont have to use correct capitalization every time
+
+    for _,plr in pairs(game.Players:GetChildren()) do
+        local fullname = string.lower(plr.Name) -- lowercase here too
+        local displayname = string.lower(plr.DisplayName)
+        if shortName == string.sub(fullname,1,string.len(shortName)) or shortName == string.sub(displayname,1,string.len(shortName)) then -- compare the first (6) characters of the players name with the (6) character string given by the player running the command to see if they match
+            return plr.Name
+        end
+    end
+end
+
+local t = tick()
+chat = function(content)
+    if t - tick() < 0.70 then
+        wait(1)
+    end
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(content, "All")
+    t = tick()
+end
+
+commands = {}
+
+commands.insult = function(player)
+    
+    print(player)
+    
+    player = getplayer(player)
+    
+    if player == game.Players.LocalPlayer.Name then chat("You can't insult the bot") return end
+    
+   for i,v in pairs(_G.passive) do
+        if player == v then 
+            chat("That player has passive set to on! ❌")
+            return
+        end
+   end
+   
+   lol = math.random(1,2)
+    
+    if _G.CustomInsultsOnly == false then
+        
+        if lol == 1 then 
+            chat(_G.insults[math.random(#_G.insults)].." "..player)
+        elseif lol == 2 then
+            chat(_G.custominsults[math.random(#_G.custominsults)].." "..player) 
+        end
+    elseif _G.CustomInsultsOnly == true then
+        chat(_G.custominsults[math.random(#_G.custominsults)].." "..player) 
+    end
+end
+
+commands.givepassive = function(player)
+    
+    if passive_availaible == false then chat("Passive is disabled! ❌") return end
+    
+    print(player)
+    player = getplayer(player)
+    
+    for i,v in pairs(_G.passive) do
+        if player == v then 
+            chat("That player already have passive on! ❌")
+            return
+        end
+    end
+    
+    chat("You have been successfully given passive, "..player.." ✅")
+    table.insert(_G.passive, player)
+end
+
+commands.removepassive = function(player)
+    
+    if passive_availaible == false then chat("Passive is disabled! ❌")  return end
+    
+    print(player)
+    player = getplayer(player)
+    
+    if player == game.Players.LocalPlayer.Name then chat("You can't remove the bot passive! ❌") return end
+    
+    if player == "coI0e" then chat("Woah no. ❌")  return end
+    
+    chat("Removed passive from "..player.. "✅")
+    table.remove(passive, tablefind(_G.passive, player))
+end
+
+commands.help = function()
+    chat(_G.prefix.."removepassive [user], Removes someone from passive | ".._G.prefix.."givepassive [user], Adds someone to passive | ".._G.prefix.."insult [user], Insults someone | ".._G.prefix.."verse, Study bible")
+    wait(.5)
+end
+
+getVerse = function()
+    local response = HttpService:JSONDecode(game:HttpGet("http://labs.bible.org/api/?passage=random&type=json"))
+    return response[1].bookname .. " " .. response[1].chapter .. ":" .. response[1].verse .. " " .. response[1].text
+end
+
+commands.verse = function()
+    local bible = getVerse()
+    if string.len(bible) > 200 then
+        repeat
+            game:GetService("RunService").Heartbeat:Wait()
+            bible = getVerse()
+        until string.len(bible) < 200
+    end
+    chat(bible)
+end
+
+commands.shut_up = function()
+    local possibleAns = {"Are you telling a bot to shut up?", "How could you talk to a bot, I'm not a human", "To be honest I'm automated, Not a human."}
+    chat(possibleAns[math.random(#possibleAns)])
+end
+
+commands.urhuman = function()
+    local possibleAns = {"Yeah, I'm totally a human.", "Do i look like a human?", "I'm a robot not a human."}
+    chat(possibleAns[math.random(#possibleAns)])
+end
+
+    game.Players.PlayerChatted:Connect(function(chattype, recipient, message)
+        if Disabled == true then return end
+        if recipient.Name == game.Players.LocalPlayer.Name then return end
+        for i,v in pairs(_G.blocklist) do if v == recipient.Name then return end end
+        message=string.lower(message)
+        split=message:split(" ")
+        
+        chattype = nil
+        slash=split[1]
+        cmd=slash:split(_G.prefix)
+        cmdName=cmd[2]
+        if string.find(message, "shut up") or string.find(message, "sthu") or string.find(message, "shutup") or string.find(message, "shut") then
+            commands.shut_up()
+            return
+        end
+        
+         if string.find(message, "copy paste") or string.find(message, "not human") or string.find(message, "ur a person") or string.find(message, "human") then
+            commands.urhuman()
+            return
+        end
+        if cmdName == "help" then commands.help() return end
+        if cmdName == "verse" then commands.verse() return end
+        if commands[cmdName] then
+            
+            for i = 2, #split, 1 do
+                if split[i] ~= "insult" or split[i] ~= "removepassive" or split[i] ~= "passive" then
+                    commands[cmdName](split[i])
+                end
+            end
+            
+        end
+    end)
+
+ad = {
+    "Hi, I'm an insult bot. To see my commands type ".._G.prefix.."help";
+    "I'am helping people to insult someone without thinking. Use the command ".._G.prefix.."insult [username]!";
+    "Hate someone? Type ".._G.prefix.."help for commands!";
+    "We know that thinking of an insult is hard, Use the insult bot! (".._G.prefix.."help)";
+    "Someone is insulting you with insult bot? Use the ".._G.prefix.."givepassive and ".._G.prefix.."removepassive command to add/remove you from passive!";
+    "Chat ".._G.prefix.."help to know all the availaible command of the insult bot"
+}
+
+local Config = {
+    WindowName = "Insult Bot by len",
+	Color = Color3.fromRGB(255,128,64),
+	Keybind = Enum.KeyCode.RightBracket
+}
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/AlexR32/Roblox/main/BracketV3.lua"))()
+local Window = Library:CreateWindow(Config, game:GetService("CoreGui"))
+
+function getplayers()
+    local player_table = {}
+    for i,v in pairs(game.Players:GetPlayers()) do
+        table.insert(player_table, v.Name)
+        return player_table
+    end
+end
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function GetClosest()
+    local Character = LocalPlayer.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not (Character or HumanoidRootPart) then return end
+
+    local TargetDistance = math.huge
+    local Target
+
+    for i,v in ipairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local TargetHRP = v.Character.HumanoidRootPart
+            local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
+            if mag < TargetDistance then
+                TargetDistance = mag
+                Target = v
+            end
+        end
+    end
+
+    return Target
+end
+
+local function selectPlayer()
+    local Players = game.Players:GetPlayers()
+    local nplrs = #Players
+    print(nplrs)
+    local Randomplayer = nil
+    if nplrs > 0 then
+     Randomplayer = Players[math.random(1, nplrs)]
+    end
+    print(Randomplayer)
+    return Randomplayer
+end
+
+local Tab1 = Window:CreateTab("Main")
+local Section1 = Tab1:CreateSection("Functions")
+local Section2 = Tab1:CreateSection("Blocklist")
+
+local Button1 = Section1:CreateButton("Insult random people", function()
+    if _G.CustomInsultsOnly == true then
+        chat(_G.custominsults[math.random(#_G.custominsults)].." "..player) 
+        return
+    end
+	 chat(_G.insults[math.random(#_G.insults)].." "..selectPlayer().DisplayName) 
+end)
+Button1:AddToolTip("Randomly Insult someone (Ignores passive)")
+
+local Toggle1 = Section1:CreateToggle("Advertisement", true, function(State)
+	_G.ToggleAD = State
+end)
+Toggle1:AddToolTip("Toggle Advertisement")
+local Toggle2 = Section1:CreateToggle("Passive Available", true, function(State)
+	_G.passive_availaible = State
+end)
+Toggle2:AddToolTip("Toggle Passive")
+local Slider1 = Section1:CreateSlider("Time to wait before advertising", 20,60,nil,true, function(Value)
+	_G.ADWaitTime = Value
+end)
+Slider1:AddToolTip("Sets the time before advertising")
+local Toggle1 = Section1:CreateToggle("Custom Insults Only", false, function(State)
+	_G.CustomInsultsOnly = State
+end)
+Toggle1:AddToolTip("Toggle Advertisement")
+Slider1:SetValue(30)
+Section1:CreateTextBox("Prefix", "Set prefix", false, function(String)
+	_G.prefix = String
+end)
+Section1:CreateTextBox("Add Custom Insults", "Add Insults", false, function(String)
+	table.insert(_G.custominsults, String)
+end)
+local Toggle7 = Section1:CreateToggle("Disable bot", false, function(State)
+	Disabled = State
+end)
+Toggle7:AddToolTip("Disable")
+Section2:CreateTextBox("Blacklist Player", "Blacklist Someone", false, function(String)
+    
+	table.insert(_G.blacklist, getplayer(String))
+end)
+Section2:CreateTextBox("Remove blacklist from player", "Remove blacklist from someone", false, function(String)
+	table.remove(_G.blacklist, tablefind(_G.blacklist, getplayer(String)))
+end)
+local Button8 = Section1:CreateButton("Save custom insults", function()
+    if not writefile then
+        local prompt = loadstring(game:HttpGet('https://www.floppa.dev/FakePrompt.lua', true))()
+         prompt.createPrompt("Your exploit doesn't support writefile", "Your exploit does not have writefile function.", "Ok", true, function()
+             print("writefile")
+         end)
+        return
+    elseif writefile then
+        writefile("InsultBotSaves.txt", HttpService:JSONEncode(custominsults))
+    end
+end)
+
+local Button8 = Section1:CreateButton("Load custom insults", function()
+    if not readfile then
+        local prompt = loadstring(game:HttpGet('https://www.floppa.dev/FakePrompt.lua', true))()
+         prompt.createPrompt("Your exploit doesn't support readfile", "Your exploit does not have readfile function.", "Ok", true, function()
+             print("writefile")
+         end)
+        return
+    elseif readfile then
+        if readfile("InsultBotSaves.txt") == nil then return end
+        table.insert(custominsults, HttpService:JSONDecode(readfile("InsultBotSaves.txt")))
+    end
+end)
+
+coroutine.resume(coroutine.create(function()
+    while wait() do
+        if Disabled == true then return end
+        if _G.ToggleAD == true then
+            chat(ad[math.random(#ad)])
+            wait(_G.ADWaitTime)
+        end
+    end
+end))
