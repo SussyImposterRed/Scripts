@@ -162,6 +162,7 @@ end
         end
     end)
 
+function getad()
 ad = {
     "Hi, I'm an insult bot. To see my commands type ".._G.prefix.."help";
     "I'am helping people to insult someone without thinking. Use the command ".._G.prefix.."insult [username]!";
@@ -170,9 +171,11 @@ ad = {
     "Someone is insulting you with insult bot? Use the ".._G.prefix.."givepassive and ".._G.prefix.."removepassive command to add/remove you from passive!";
     "Chat ".._G.prefix.."help to know all the availaible command of the insult bot"
 }
+return ad
+end
 
 local Config = {
-    WindowName = "Insult Bot by len",
+    WindowName = "Insult Bot",
 	Color = Color3.fromRGB(255,128,64),
 	Keybind = Enum.KeyCode.RightBracket
 }
@@ -300,6 +303,7 @@ end)
 coroutine.resume(coroutine.create(function()
     while wait() do
         if Disabled == true then return end
+        local ad = getad()
         if _G.ToggleAD == true then
             chat(ad[math.random(#ad)])
             wait(_G.ADWaitTime)
