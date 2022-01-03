@@ -177,6 +177,12 @@ ad = {
 return ad
 end
 
+game.Players.PlayerAdded:Connect(function(p)
+    if _G.greetings then
+    chat("Hey! "..p.Name..", Say ".._G.prefix.."help for insult bot commands!")
+    end
+end)
+
 local Config = {
     WindowName = "Insult Bot",
 	Color = Color3.fromRGB(255,128,64),
@@ -244,6 +250,10 @@ local Button1 = Section1:CreateButton("Insult random people", function()
 end)
 Button1:AddToolTip("Randomly Insult someone (Ignores passive)")
 
+local Toggle67 = Section1:CreateToggle("Greetings", true, function(State)
+	_G.greetings = State
+end)
+Toggle67:AddToolTip("Toggle Greetings")
 local Toggle1 = Section1:CreateToggle("Advertisement", true, function(State)
 	_G.ToggleAD = State
 end)
