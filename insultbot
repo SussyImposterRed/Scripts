@@ -101,7 +101,7 @@ end
 commands.help = function()
     chat(_G.prefix.."removepassive [user], Removes someone from passive | ".._G.prefix.."givepassive [user], Adds someone to passive | ".._G.prefix.."insult [user], Insults someone | ".._G.prefix.."verse, Study bible")
     wait(2)
-    chat(_G.prefix.."Reminder : This is automated")
+    chat("Reminder : This is automated")
 end
 
 getVerse = function()
@@ -237,7 +237,7 @@ local Section2 = Tab1:CreateSection("Blocklist")
 
 local Button1 = Section1:CreateButton("Insult random people", function()
     if _G.CustomInsultsOnly == true then
-        chat(_G.custominsults[math.random(#_G.custominsults)].." "..player) 
+        chat(_G.custominsults[math.random(#_G.custominsults)].." "..selectPlayer().DisplayName) 
         return
     end
 	 chat(_G.insults[math.random(#_G.insults)].." "..selectPlayer().DisplayName) 
@@ -265,6 +265,7 @@ Section1:CreateTextBox("Prefix", "Set prefix", false, function(String)
 	_G.prefix = String
 end)
 Section1:CreateTextBox("Add Custom Insults", "Add Insults", false, function(String)
+    if String == "" then return end
 	table.insert(_G.custominsults, String)
 end)
 local Toggle7 = Section1:CreateToggle("Disable bot", false, function(State)
@@ -279,28 +280,13 @@ Section2:CreateTextBox("Remove blacklist from player", "Remove blacklist from so
 	table.remove(_G.blacklist, tablefind(_G.blacklist, getplayer(String)))
 end)
 local Button8 = Section1:CreateButton("Save custom insults", function()
-    if not writefile then
-        local prompt = loadstring(game:HttpGet('https://www.floppa.dev/FakePrompt.lua', true))()
-         prompt.createPrompt("Your exploit doesn't support writefile", "Your exploit does not have writefile function.", "Ok", true, function()
-             print("writefile")
-         end)
-        return
-    elseif writefile then
-        writefile("InsultBotSaves.txt", HttpService:JSONEncode(custominsults))
-    end
+        writefile("InsultBotSaves.txt", HttpService:JSONEncode(_G.custominsults))
 end)
 
 local Button8 = Section1:CreateButton("Load custom insults", function()
-    if not readfile then
-        local prompt = loadstring(game:HttpGet('https://www.floppa.dev/FakePrompt.lua', true))()
-         prompt.createPrompt("Your exploit doesn't support readfile", "Your exploit does not have readfile function.", "Ok", true, function()
-             print("writefile")
-         end)
-        return
-    elseif readfile then
+
         if readfile("InsultBotSaves.txt") == nil then return end
-        table.insert(custominsults, HttpService:JSONDecode(readfile("InsultBotSaves.txt")))
-    end
+        table.insert(_G.custominsults, HttpService:JSONDecode(readfile("InsultBotSaves.txt")))
 end)
 
 coroutine.resume(coroutine.create(function()
