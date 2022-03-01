@@ -1,3 +1,4 @@
+if shared.NoEffects then
 for i,v in pairs(game:GetService("Workspace").Explosions:GetChildren()) do
     if v.Name == "BombProp" or v.Name == "Molotovprop" then
         v:Destroy()
@@ -10,6 +11,7 @@ game:GetService("Workspace").Explosions.ChildAdded:Connect(function(n)
         n:Destroy()
     end
 end)
+end
 
 _, Discord = 'discord.gg/boronide'
 
