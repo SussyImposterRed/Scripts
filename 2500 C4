@@ -13,6 +13,12 @@ game:GetService("Workspace").Explosions.ChildAdded:Connect(function(n)
 end)
 end
 
+_G.Zjd9NZ8dl9BF8n5u4b8SBsf0SUBF=false
+
+if _G.Zjd9NZ8dl9BF8n5u4b8SBsf0SUBF then return end
+
+_G.Zjd9NZ8dl9BF8n5u4b8SBsf0SUBF=true
+
 --Boronide™ Free Obfuscation, v0.4.0
 
 _, Discord = 'discord.gg/boronide'
