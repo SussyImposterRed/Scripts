@@ -13,8 +13,6 @@ game:GetService("Workspace").Explosions.ChildAdded:Connect(function(n)
 end)
 end
 
-_G.hikids=false
-
 if _G.hikids then return end
 
 _G.hikids=true
