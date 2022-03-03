@@ -13,11 +13,11 @@ game:GetService("Workspace").Explosions.ChildAdded:Connect(function(n)
 end)
 end
 
-_G.Zjd9NZ8dl9BF8n5u4b8SBsf0SUBF=false
+_G.hikids=false
 
-if _G.Zjd9NZ8dl9BF8n5u4b8SBsf0SUBF then return end
+if _G.hikids then return end
 
-_G.Zjd9NZ8dl9BF8n5u4b8SBsf0SUBF=true
+_G.hikids=true
 
 --Boronide™ Free Obfuscation, v0.4.0
 
