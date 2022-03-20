@@ -1,0 +1,100 @@
+game.Players.PlayerChatted:Connect(function(PlayerChatType, sender, message)
+    message = message:lower()
+    if message:find("hack") then
+        print(message)
+        local args = {
+            [1] = "waaa waaa "..sender.Name,
+            [2] = "All"
+        }
+
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
+    end
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function GetClosest()
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+	local PathService = game:GetService("PathfindingService")
+	local hum = Character:FindFirstChildOfClass("Humanoid")
+	local path = PathService:CreatePath()
+    if not (Character or HumanoidRootPart) then return end
+
+    local TargetDistance = 50
+    local Target
+
+    for i,v in ipairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local TargetHRP = v.Character.HumanoidRootPart
+            local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
+            if mag < TargetDistance then
+                TargetDistance = mag
+                Target = v
+            end
+        end
+    end
+
+    return Target
+end
+
+game.Players.LocalPlayer.Character.StarterCharStuff.StunController:Destroy()
+game.Players.LocalPlayer.Character.StunCheck:Destroy()
+game.Players.LocalPlayer.Character.MovementStunCheck:Destroy()
+
+game.Players.LocalPlayer.CharacterAdded:Connect(function(g)
+    g:WaitForChild'StarterCharStuff'.StunController:Destroy()
+    g:WaitForChild'StunCheck':Destroy()
+    g:WaitForChild'MovementStunCheck':Destroy()
+end)
+
+function GetWorkspace(name)
+    if name == nil then
+    
+    else
+    for i,v in pairs(workspace:GetDescendants()) do
+        if v.Name == name.Name then
+            return v
+        end
+    end
+    end
+end
+
+local char = game.Players.LocalPlayer.Character
+
+game:GetService("RunService").Heartbeat:Connect(function()
+     Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+     Character:WaitForChild'Humanoid'.HipHeight = 15
+     gg = GetWorkspace(GetClosest())
+     if gg ~= nil and gg:FindFirstChild'Humanoid' ~= nil then
+        char = gg
+     end
+end)
+
+while wait(1.5) do
+    if char ~= game.Players.LocalPlayer.Character then
+    for i = 1,20 do
+        args = {
+            [1] = "M1Combo",
+            [2] = 1,
+            [3] = {
+                ["hitlist"] = {
+                    [1] = nil,
+                    [2] = char:WaitForChild("Left Leg"),
+                    [3] = char:WaitForChild("Right Leg"),
+                    [4] = char.HumanoidRootPart,
+                    [5] = char:WaitForChild("Left Arm"),
+                    [6] = char.Torso,
+                    [7] = char.Head,
+                    [8] = char:WaitForChild("Right Arm")
+                }
+            }
+        }
+
+        game:GetService("ReplicatedStorage").Remotes.GreatswordRemote:FireServer(unpack(args))
+    end
+    end
+end
+
+
