@@ -1,0 +1,1 @@
+a = _G.Mode;b = _G.ConfigCode;c = _G.ConfigName;if a == "add" then writefile("projecthook/"..c..".txt", b);elseif a == "remove" then delfile("projecthook/"..c..".txt");end;
