@@ -1,0 +1,133 @@
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+return function(Title,Items,Callback)
+	local ItemsAmount = #Items
+	local LenLoader = Instance.new("ScreenGui")
+	local UI = Instance.new("Frame")
+	local UIGradient = Instance.new("UIGradient")
+	local Bar = Instance.new("Frame")
+	local Percent = Instance.new("Frame")
+	local UICorner = Instance.new("UICorner")
+	local UICorner_2 = Instance.new("UICorner")
+	local Text = Instance.new("TextLabel")
+	local Title = Instance.new("TextLabel")
+	local ImageLabel = Instance.new("ImageLabel")
+	local UICorner_3 = Instance.new("UICorner")
+	local Close = Instance.new("TextButton")
+	local Info = TweenInfo.new(1)
+	local Tween = game:GetService("TweenService"):Create(UI,Info,{BackgroundTransparency=0})
+	local Tween1 = game:GetService("TweenService"):Create(Bar,Info,{BackgroundTransparency=0})
+	local Tween2 = game:GetService("TweenService"):Create(Percent,Info,{BackgroundTransparency=0})
+	local Tween3 = game:GetService("TweenService"):Create(Text,Info,{TextTransparency=0})
+	local Tween4 = game:GetService("TweenService"):Create(Title,Info,{TextTransparency=0})
+	local Tween5 = game:GetService("TweenService"):Create(Close,Info,{TextTransparency=0})
+	local Tween6 = game:GetService("TweenService"):Create(ImageLabel,Info,{ImageTransparency=0})
+
+	--Properties:
+	LenLoader.Name = "LenLoader"
+	LenLoader.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+	LenLoader.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	UI.Name = "UI"
+	UI.Parent = LenLoader
+	UI.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	UI.BorderSizePixel = 0
+	UI.Position = UDim2.new(0.336588591, 0, 0.246205747, 0)
+	UI.Size = UDim2.new(0, 500, 0, 300)
+
+	UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(47, 49, 62)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(25, 25, 25))}
+	UIGradient.Offset = Vector2.new(100, 0)
+	UIGradient.Rotation = 90
+	UIGradient.Parent = UI
+
+	Bar.Name = "Bar"
+	Bar.Parent = UI
+	Bar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Bar.BorderSizePixel = 0
+	Bar.Position = UDim2.new(0.0500000007, 0, 0.893333316, 0)
+	Bar.Size = UDim2.new(0, 450, 0, 15)
+
+	Percent.Name = "Percent"
+	Percent.Parent = Bar
+	Percent.BackgroundColor3 = Color3.fromRGB(126, 255, 137)
+	Percent.BorderSizePixel = 0
+	Percent.Size = UDim2.new(0, 0, 1, 0)
+
+	UICorner.Parent = Percent
+
+	UICorner_2.Parent = Bar
+
+	Text.Name = "Text"
+	Text.Parent = UI
+	Text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Text.BackgroundTransparency = 1.000
+	Text.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	Text.Position = UDim2.new(0.361999989, 0, 0.786666691, 0)
+	Text.Size = UDim2.new(0, 138, 0, 24)
+	Text.Font = Enum.Font.GothamBlack
+	Text.Text = Items[1].." (1/"..ItemsAmount..")"
+	Text.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Text.TextSize = 14.000
+	Text.TextWrapped = true
+
+	Title.Name = "Title"
+	Title.Parent = UI
+	Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Title.BackgroundTransparency = 1.000
+	Title.BorderColor3 = Color3.fromRGB(27, 42, 53)
+	Title.Position = UDim2.new(0.182000011, 0, 0.626666665, 0)
+	Title.Size = UDim2.new(0, 318, 0, 24)
+	Title.Font = Enum.Font.GothamBlack
+	Title.Text = ("%s"):format(Title)
+	Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Title.TextSize = 24.000
+	Title.TextWrapped = true
+
+	ImageLabel.Parent = UI
+	ImageLabel.BackgroundColor3 = Color3.fromRGB(57, 57, 70)
+	ImageLabel.Position = UDim2.new(0.350000024, 0, 0.0633333474, 0)
+	ImageLabel.Size = UDim2.new(0, 150, 0, 150)
+	ImageLabel.Image = ("rbxthumb://type=AvatarHeadShot&id=%s&w=420&h=420"):format(game.Players.LocalPlayer.UserId)
+
+	UICorner_3.CornerRadius = UDim.new(25, 0)
+	UICorner_3.Parent = ImageLabel
+
+	Close.Name = "Close"
+	Close.Parent = UI
+	Close.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Close.BackgroundTransparency = 1.000
+	Close.Position = UDim2.new(0.948000073, 0, 0, 0)
+	Close.Size = UDim2.new(0, 25, 0, 25)
+	Close.Font = Enum.Font.GothamBlack
+	Close.Text = "X"
+	Close.TextColor3 = Color3.fromRGB(255, 0, 0)
+	Close.TextSize = 14.000
+
+	Close.MouseButton1Down:Connect(function()
+		Callback()
+	end)
+	
+	Tween:Play()
+	task.wait(1)
+	Tween1:Play()
+	task.wait(1)
+	Tween2:Play()
+	task.wait(1)
+	Tween3:Play()
+	task.wait(1)
+	Tween4:Play()
+	task.wait(1)
+	Tween5:Play()
+	task.wait(1)
+	Tween6:Play()
+	task.wait(1)
+	for i = 1,ItemsAmount do
+		wait(i/ItemsAmount+.1)
+		Percent:TweenSize(UDim2.new(0,i/ItemsAmount * 450,1,0))
+		Text.Text = Items[i].." ("..i.."/"..ItemsAmount..")"
+	end
+	task.wait()
+	Callback()
+	Text.Text = "Loaded "..Title
+end
