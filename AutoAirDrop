@@ -1,0 +1,9 @@
+-- MADE BY NOVA HUB
+local Airdrops = game:GetService("Workspace").Airdrops;
+local LocalPlayer = game:GetService('Player').LocalPlayer;
+Airdrops.ChildAdded:Connect(function(o)
+    local Airdrop = o;
+    LocalPlayer.Character.HumanoidRootPart.CFrame = Airdrop:WaitForChild'Crate'.Base.CFrame;
+    wait(.2);
+    fireproximityprompt(Airdrop:WaitForChild'Crate'.Hitbox.ProximityPrompt);
+end);
