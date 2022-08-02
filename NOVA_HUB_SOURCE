@@ -1575,6 +1575,18 @@ do
                 end
             end
         end
+        
+        if typeof(v) == "table" and rawget(v, "toggleRagdoll") then
+            local old = v.toggleRagdoll
+            
+            v.toggleRagdoll = function(gg, gg2, gg3)
+                if menu.values[4].misc.player["No Ragdoll"].Toggle then
+                    return
+                else
+                    return old(gg, gg2, gg3)
+                end
+            end
+        end
 
         if typeof(v) == "table" and rawget(v, "DASH_COOLDOWN") then
             local old = v.DASH_COOLDOWN
