@@ -1,0 +1,89 @@
+local attach = {}
+local motor = {}
+local Players = game:service'Players'
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character
+local RunService = game:service'RunService'
+local UIS = game:service'UserInputService'
+-- !! REANIMATION !!
+local Animate = Character.Animate
+Animate.Disabled = true
+local FakeAnimate = Animate:Clone()
+for i,BSC in pairs(Character.Torso:GetChildren()) do
+    if BSC:IsA("Motor6D") then
+        if BSC.Name ~= 'Neck' then
+            BSC:Destroy()
+        end
+    end
+end
+for i,BSC in pairs(Character:GetDescendants()) do
+    if BSC:IsA("BallSocketConstraint") then
+        BSC.Enabled = true
+        BSC.Visible = true
+        BSC.TwistLimitsEnabled = true
+        BSC.LimitsEnabled = true
+        BSC.TwistUpperAngle = 0
+        BSC.TwistLowerAngle = 0
+        BSC.UpperAngle = 0
+        BSC.Radius = 0
+        BSC.MaxFrictionTorque = math.huge * 9e9
+        BSC.Restitution = 0
+        local name = BSC.Parent.Name:lower()
+        name = string.gsub(name," ","")
+        attach[name] = BSC.Attachment0
+    end
+end
+FakeAnimate.Parent = Character
+FakeAnimate.Disabled = false
+local Humanoid = Character.Humanoid
+local rightarm = attach["rightarm"].CFrame
+local leftarm = attach["leftarm"].CFrame
+local rightleg = attach["rightleg"].CFrame
+local leftleg = attach["leftleg"].CFrame
+sine = 0
+while true do
+    sine = sine + 1
+    local State = (Humanoid.MoveDirection == Vector3.new(0,0,0)) and "Idle" or (Humanoid:GetState() == Enum.HumanoidStateType.Running) and "Walk"
+    if State == "Idle" then
+        Humanoid.HipHeight = -1.5
+        attach["rightarm"].CFrame = rightarm * CFrame.Angles(math.rad(-50),math.rad(90),0)
+        attach["leftarm"].CFrame = leftarm * CFrame.Angles(math.rad(50),math.rad(-90),0)
+        attach["rightleg"].CFrame = rightleg * CFrame.Angles(math.rad(90),0,math.rad(15))
+        attach["leftleg"].CFrame = leftleg * CFrame.Angles(math.rad(90),0,math.rad(-15))
+    elseif State == "Walk" then
+        Humanoid.HipHeight = 0
+        if sinemode then
+            attach["rightarm"].CFrame = rightarm * CFrame.Angles(math.sin(25 * sine),0,math.rad(-90))
+            attach["leftarm"].CFrame = leftarm * CFrame.Angles(math.sin(25 * sine),0,math.rad(-90))
+            attach["rightleg"].CFrame = rightleg * CFrame.Angles(math.sin(25 * sine),0,0)
+            attach["leftleg"].CFrame = leftleg * CFrame.Angles(math.sin(-25 * sine),0,0)
+        else
+            attach["rightarm"].CFrame = rightarm * CFrame.Angles(math.sin(25 * tick()),0,math.rad(-90))
+            attach["leftarm"].CFrame = leftarm * CFrame.Angles(math.sin(25 * tick()),0,math.rad(-90))
+            attach["rightleg"].CFrame = rightleg * CFrame.Angles(math.sin(25 * tick()),0,0)
+            attach["leftleg"].CFrame = leftleg * CFrame.Angles(math.sin(-25 * tick()),0,0)
+        end
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+        Humanoid.WalkSpeed = 25
+        sinemode = false
+    else
+        Humanoid.WalkSpeed = 16
+        sinemode = true
+    end
+    for i,BSC in pairs(Character:GetDescendants()) do
+        if BSC:IsA("BallSocketConstraint") then
+            BSC.Enabled = true
+            BSC.Visible = true
+            BSC.TwistLimitsEnabled = true
+            BSC.LimitsEnabled = true
+            BSC.TwistUpperAngle = 0
+            BSC.TwistLowerAngle = 0
+            BSC.UpperAngle = 0
+            BSC.Radius = 0
+            BSC.MaxFrictionTorque = math.huge * 9e9
+            BSC.Restitution = 0
+        end
+    end
+    game.RunService.Heartbeat:Wait()
+end
