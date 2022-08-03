@@ -209,9 +209,23 @@ local dis = UIS.InputBegan:Connect(function(K,C)
         end
     end
 end)
-
-Humanoid.Died:Connect(function()
-    dis:Disconnect()
+task.spawn(function()
+    while wait(3) do
+        for i,BSC in pairs(Character:GetDescendants()) do
+            if BSC:IsA("BallSocketConstraint") then
+                BSC.Enabled = true
+                BSC.Visible = true
+                BSC.TwistLimitsEnabled = true
+                BSC.LimitsEnabled = true
+                BSC.TwistUpperAngle = 0
+                BSC.TwistLowerAngle = 0
+                BSC.UpperAngle = 0
+                BSC.Radius = 0
+                BSC.MaxFrictionTorque = math.huge * 9e9
+                BSC.Restitution = 0
+            end
+        end
+    end
 end)
 while true do
     sine = sine + 1
@@ -259,20 +273,6 @@ while true do
     else
         Humanoid.WalkSpeed = 16
         sinemode = true
-    end
-    for i,BSC in pairs(Character:GetDescendants()) do
-        if BSC:IsA("BallSocketConstraint") then
-            BSC.Enabled = true
-            BSC.Visible = true
-            BSC.TwistLimitsEnabled = true
-            BSC.LimitsEnabled = true
-            BSC.TwistUpperAngle = 0
-            BSC.TwistLowerAngle = 0
-            BSC.UpperAngle = 0
-            BSC.Radius = 0
-            BSC.MaxFrictionTorque = math.huge * 9e9
-            BSC.Restitution = 0
-        end
     end
     game.RunService.Heartbeat:Wait()
 end
