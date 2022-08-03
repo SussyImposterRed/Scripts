@@ -1,3 +1,12 @@
+pcall(function()
+    local StarterGui = game:GetService("StarterGui")
+    StarterGui:SetCore("SendNotification", {
+            Title = "NOVA HUB Reanimataion Loaded";
+            Text = "Loaded FE Dog";
+            
+        })
+end)
+
 local attach = {}
 local motor = {}
 local Players = game:service'Players'
@@ -8,6 +17,7 @@ local UIS = game:service'UserInputService'
 -- !! REANIMATION !!
 local Animate = Character.Animate
 Animate.Disabled = true
+Animate:Destroy()
 for i,BSC in pairs(Character.Torso:GetChildren()) do
     if BSC:IsA("Motor6D") then
         --if BSC.Name ~= 'Neck' then
@@ -35,6 +45,7 @@ for i,BSC in pairs(Character:GetDescendants()) do
     end
 end
 attach["neck"] = Character.Torso.NeckAttachment
+local SprintSpeed = 35
 local Humanoid = Character.Humanoid
 local neck = attach["neck"].CFrame
 local rightarm = attach["rightarm"].CFrame
@@ -49,14 +60,12 @@ local Flailing = Humanoid:LoadAnimation(Animation)
 Character.Head.CanCollide = false
 Character.Torso.CanCollide = false
 sine = 0
-rotated = false
 while true do
     sine = sine + 1
-    root = Character["HumanoidRootPart"].CFrame * CFrame.Angles(0,0,0)
     local State = (Humanoid.MoveDirection == Vector3.new(0,0,0) and not Humanoid.Jump) and "Idle" or (Humanoid:GetState() == Enum.HumanoidStateType.Running and not Humanoid.Jump) and "Walk" or (Humanoid.Jump == true) and "Jumping" or (Humanoid:GetState() == Enum.HumanoidStateType.FallingDown) and "Falling"
     --print(State)
     if State == "Idle" then
-        Humanoid.HipHeight = -1.45
+        Humanoid.HipHeight = -1.3
         Flailing:Stop()
         attach["neck"].CFrame = neck * CFrame.Angles(0,0,0)
         attach["rightarm"].CFrame = rightarm * CFrame.Angles(math.rad(-50),math.rad(90),0)
@@ -64,7 +73,7 @@ while true do
         attach["rightleg"].CFrame = rightleg * CFrame.Angles(math.rad(90),0,math.rad(15))
         attach["leftleg"].CFrame = leftleg * CFrame.Angles(math.rad(90),0,math.rad(-15))
     elseif State == "Walk" then
-        Humanoid.HipHeight = 1.2
+        Humanoid.HipHeight = 1
         Flailing:Play()
         if sinemode then
             game.ReplicatedStorage.Communication.Events.UpdateIsParkouring:FireServer(true)
@@ -91,7 +100,7 @@ while true do
         attach["leftleg"].CFrame = leftleg * CFrame.Angles(45 + math.sin(25 * sine),math.rad(15),math.rad(-5))
     end
     if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
-        Humanoid.WalkSpeed = 45
+        Humanoid.WalkSpeed = SprintSpeed
         sinemode = false
     else
         Humanoid.WalkSpeed = 16
