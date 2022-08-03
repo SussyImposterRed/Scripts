@@ -93,6 +93,28 @@ for i,BSC in pairs(Character:GetDescendants()) do
         end
     end
 end
+-- main script
+local function GetClosest(dist)
+    local Character = LocalPlayer.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not (Character or HumanoidRootPart) then return end
+
+    local TargetDistance = dist
+    local Target
+
+    for i,v in ipairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local TargetHRP = v.Character.HumanoidRootPart
+            local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
+            if mag < TargetDistance then
+                TargetDistance = mag
+                Target = v
+            end
+        end
+    end
+
+    return Target
+end
 attach["neck"] = Character.Torso.NeckAttachment
 local SprintSpeed = 35
 local Humanoid = Character.Humanoid
@@ -113,7 +135,7 @@ Character.Head.CanCollide = false
 Character.Torso.CanCollide = false
 sine = 0
 
-UIS.InputBegan:Connect(function(K,C)
+local dis = UIS.InputBegan:Connect(function(K,C)
     if C then return end
     
     if (K.KeyCode == Enum.KeyCode.R and State == "Idle" and hand == false and succ == false) then
@@ -141,6 +163,48 @@ UIS.InputBegan:Connect(function(K,C)
             Humanoid.WalkSpeed = 16
         end)
     end
+    
+    if (K.KeyCode == Enum.KeyCode.G) then
+        local Weapon
+        for i, v in pairs(LocalPlayer.Backpack:GetChildren()) do
+            if v:IsA("Tool") then
+                if v:FindFirstChild("Hitboxes") ~= nil then
+                    Weapon = v
+                end
+            end
+        end
+        if Weapon then
+            Humanoid:EquipTool(Weapon)
+            local Closest = GetClosest(12)
+            if Closest then
+                local args1 = {
+                    [1] = Weapon,
+                    [2] = 1
+                }
+
+                game:GetService("ReplicatedStorage").Communication.Events.MeleeSwing:FireServer(unpack(args1))
+                wait(.2)
+
+                local args = {
+                    [1] = Weapon,
+                    [2] = Closest.Character.Head,
+                    [3] = Weapon.Hitboxes.Hitbox,
+                    [4] = Closest.Character.Head.Position,
+                }
+
+                game:GetService("ReplicatedStorage").Communication.Events.MeleeDamage:FireServer(unpack(args))
+
+                game:GetService("ReplicatedStorage").Communication.Events.MeleeDamage:FireServer(unpack(args))
+                Weapon.Parent = LocalPlayer.Backpack
+            end
+            wait(.2)
+            Weapon.Parent = LocalPlayer.Backpack
+        end
+    end
+end)
+
+Humanoid.Died:Connect(function()
+    dis:Disconnect()
 end)
 while true do
     sine = sine + 1
