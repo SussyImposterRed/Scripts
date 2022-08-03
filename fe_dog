@@ -128,7 +128,7 @@ local Animation = Instance.new('Animation')
 Animation.AnimationId = "rbxassetid://282574440"
 Animation.Parent = Humanoid
 local Animation2 = Instance.new('Animation')
-Animation2.AnimationId = "rbxassetid://7261701036"
+Animation2.AnimationId = "rbxassetid://4611813691"
 Animation2.Parent = Humanoid
 local Flailing = Humanoid:LoadAnimation(Animation)
 local StandUp = Humanoid:LoadAnimation(Animation2)
@@ -177,8 +177,9 @@ local dis = UIS.InputBegan:Connect(function(K,C)
                 end
             end
         end
+        StandUp:Play()
+        StandUp.TimePosition = 0.3
         if Weapon then
-            StandUp:Play()
             Humanoid:EquipTool(Weapon)
             local Closest = GetClosest(12)
             if Closest then
