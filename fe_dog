@@ -1,7 +1,7 @@
 pcall(function()
     local StarterGui = game:GetService("StarterGui")
     StarterGui:SetCore("SendNotification", {
-            Title = "NOVA HUB Reanimataion Loaded";
+            Title = "NOVA HUB Reanimataion";
             Text = "Loaded FE Dog";
             
         })
