@@ -177,25 +177,27 @@ local dis = UIS.InputBegan:Connect(function(K,C)
             Humanoid:EquipTool(Weapon)
             local Closest = GetClosest(12)
             if Closest then
-                local args1 = {
-                    [1] = Weapon,
-                    [2] = 1
-                }
+                pcall(function()
+                    local args1 = {
+                        [1] = Weapon,
+                        [2] = 1
+                    }
 
-                game:GetService("ReplicatedStorage").Communication.Events.MeleeSwing:FireServer(unpack(args1))
-                wait(.2)
+                    game:GetService("ReplicatedStorage").Communication.Events.MeleeSwing:FireServer(unpack(args1))
+                    wait(.2)
 
-                local args = {
-                    [1] = Weapon,
-                    [2] = Closest.Character.Head,
-                    [3] = Weapon.Hitboxes.Hitbox,
-                    [4] = Closest.Character.Head.Position,
-                }
+                    local args = {
+                        [1] = Weapon,
+                        [2] = Closest.Character.HumanoidRootPart,
+                        [3] = Weapon.Hitboxes.Hitbox,
+                        [4] = Closest.Character.HumanoidRootPart.Position,
+                    }
 
-                game:GetService("ReplicatedStorage").Communication.Events.MeleeDamage:FireServer(unpack(args))
+                    game:GetService("ReplicatedStorage").Communication.Events.MeleeDamage:FireServer(unpack(args))
 
-                game:GetService("ReplicatedStorage").Communication.Events.MeleeDamage:FireServer(unpack(args))
-                Weapon.Parent = LocalPlayer.Backpack
+                    game:GetService("ReplicatedStorage").Communication.Events.MeleeDamage:FireServer(unpack(args))
+                    Weapon.Parent = LocalPlayer.Backpack
+                end)
             end
             wait(.2)
             Weapon.Parent = LocalPlayer.Backpack
