@@ -1,0 +1,115 @@
+local attach = {}
+local motor = {}
+local Players = game:service'Players'
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character
+local RunService = game:service'RunService'
+local UIS = game:service'UserInputService'
+-- !! REANIMATION !!
+local Animate = Character.Animate
+Animate.Disabled = true
+for i,BSC in pairs(Character.Torso:GetChildren()) do
+    if BSC:IsA("Motor6D") then
+        --if BSC.Name ~= 'Neck' then
+        BSC:Destroy()
+        --end
+    end
+end
+for i,BSC in pairs(Character:GetDescendants()) do
+    if BSC:IsA("BallSocketConstraint") then
+        BSC.Enabled = true
+        BSC.Visible = true
+        BSC.TwistLimitsEnabled = true
+        BSC.LimitsEnabled = true
+        BSC.TwistUpperAngle = 0
+        BSC.TwistLowerAngle = 0
+        BSC.UpperAngle = 0
+        BSC.Radius = 0
+        BSC.MaxFrictionTorque = math.huge * 9e9
+        BSC.Restitution = 0
+        local name = BSC.Parent.Name:lower()
+        if name ~= "neck" then
+            name = string.gsub(name," ","")
+            attach[name] = BSC.Attachment0
+        end
+    end
+end
+attach["neck"] = Character.Torso.NeckAttachment
+local Humanoid = Character.Humanoid
+local neck = attach["neck"].CFrame
+local rightarm = attach["rightarm"].CFrame
+local leftarm = attach["leftarm"].CFrame
+local rightleg = attach["rightleg"].CFrame
+local leftleg = attach["leftleg"].CFrame
+local root = Character["HumanoidRootPart"].RootJoint.C1
+local Animation = Instance.new('Animation')
+Animation.AnimationId = "rbxassetid://282574440"
+Animation.Parent = Humanoid
+local Flailing = Humanoid:LoadAnimation(Animation)
+Character.Head.CanCollide = false
+Character.Torso.CanCollide = false
+sine = 0
+rotated = false
+while true do
+    sine = sine + 1
+    root = Character["HumanoidRootPart"].CFrame * CFrame.Angles(0,0,0)
+    local State = (Humanoid.MoveDirection == Vector3.new(0,0,0) and not Humanoid.Jump) and "Idle" or (Humanoid:GetState() == Enum.HumanoidStateType.Running and not Humanoid.Jump) and "Walk" or (Humanoid.Jump == true) and "Jumping" or (Humanoid:GetState() == Enum.HumanoidStateType.FallingDown) and "Falling"
+    --print(State)
+    if State == "Idle" then
+        Humanoid.HipHeight = -1.45
+        Flailing:Stop()
+        attach["neck"].CFrame = neck * CFrame.Angles(0,0,0)
+        attach["rightarm"].CFrame = rightarm * CFrame.Angles(math.rad(-50),math.rad(90),0)
+        attach["leftarm"].CFrame = leftarm * CFrame.Angles(math.rad(50),math.rad(-90),0)
+        attach["rightleg"].CFrame = rightleg * CFrame.Angles(math.rad(90),0,math.rad(15))
+        attach["leftleg"].CFrame = leftleg * CFrame.Angles(math.rad(90),0,math.rad(-15))
+    elseif State == "Walk" then
+        Humanoid.HipHeight = 1.2
+        Flailing:Play()
+        if sinemode then
+            game.ReplicatedStorage.Communication.Events.UpdateIsParkouring:FireServer(true)
+            attach["neck"].CFrame = neck * CFrame.new(0,1,0) * CFrame.Angles(math.rad(90),0,0)
+            attach["rightarm"].CFrame = rightarm * CFrame.new(-1,1,0) * CFrame.Angles(45 + math.sin(25 * sine),0,math.rad(-90))
+            attach["leftarm"].CFrame = leftarm * CFrame.new(-1,1,0) * CFrame.Angles(-45 - math.sin(-25 * sine),0,math.rad(-90))
+            attach["rightleg"].CFrame = rightleg * CFrame.Angles(45 + math.sin(25 * sine),0,0)
+            attach["leftleg"].CFrame = leftleg * CFrame.Angles(45 + math.sin(-25 * sine),0,0)
+        else
+            game.ReplicatedStorage.Communication.Events.UpdateIsParkouring:FireServer(false)
+            attach["neck"].CFrame = neck * CFrame.new(0,1,0) * CFrame.Angles(math.rad(90),0,0)
+            attach["rightarm"].CFrame = rightarm * CFrame.new(-1,1,0) * CFrame.Angles(45 + math.sin(25 * tick()),0,math.rad(-90))
+            attach["leftarm"].CFrame = leftarm * CFrame.new(-1,1,0) * CFrame.Angles(-45 - math.sin(-25 * tick()),0,math.rad(-90))
+            attach["rightleg"].CFrame = rightleg * CFrame.Angles(45 + math.sin(25 * tick()),0,0)
+            attach["leftleg"].CFrame = leftleg * CFrame.Angles(45 + math.sin(-25 * tick()),0,0)
+        end
+    elseif State == false then
+        game.ReplicatedStorage.Communication.Events.UpdateIsParkouring:FireServer(false)
+        Flailing:Play()
+        attach["neck"].CFrame = neck * CFrame.new(0,1,0) * CFrame.Angles(math.rad(90),0,0)
+        attach["rightarm"].CFrame = rightarm * CFrame.new(-1,1,0) * CFrame.Angles(45 + math.sin(-25 * sine),math.rad(-15),math.rad(-90))
+        attach["leftarm"].CFrame = leftarm * CFrame.new(-1,1,0) * CFrame.Angles(-45 + math.sin(25 * sine),math.rad(15),math.rad(-90))
+        attach["rightleg"].CFrame = rightleg * CFrame.Angles(45 + math.sin(25 * sine),math.rad(-15),math.rad(5))
+        attach["leftleg"].CFrame = leftleg * CFrame.Angles(45 + math.sin(25 * sine),math.rad(15),math.rad(-5))
+    end
+    if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
+        Humanoid.WalkSpeed = 45
+        sinemode = false
+    else
+        Humanoid.WalkSpeed = 16
+        sinemode = true
+    end
+    for i,BSC in pairs(Character:GetDescendants()) do
+        if BSC:IsA("BallSocketConstraint") then
+            BSC.Enabled = true
+            BSC.Visible = true
+            BSC.TwistLimitsEnabled = true
+            BSC.LimitsEnabled = true
+            BSC.TwistUpperAngle = 0
+            BSC.TwistLowerAngle = 0
+            BSC.UpperAngle = 0
+            BSC.Radius = 0
+            BSC.MaxFrictionTorque = math.huge * 9e9
+            BSC.Restitution = 0
+        end
+    end
+    game.RunService.Heartbeat:Wait()
+end
