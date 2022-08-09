@@ -1,0 +1,169 @@
+local events = game:GetService("ReplicatedStorage").Communication.Events
+local functions = game:GetService("ReplicatedStorage").Communication.Functions
+for i,v in pairs(getgc(true)) do
+    if typeof(v) == 'table' and rawget(v, 'getIsBodyMoverCreatedByGame') then
+         v.getIsBodyMoverCreatedByGame = function(gg)
+             return true
+         end
+    end
+    if typeof(v) == 'table' and rawget(v, 'kick') then
+         v.kick = function() return wait(9e9) end
+    end
+    if typeof(v) == 'table' and rawget(v, 'randomDelayKick') then
+         v.randomDelayKick = function() return wait(9e9) end
+    end
+    if typeof(v) == 'table' and rawget(v, 'connectCharacter') then
+         v.connectCharacter = function(gg) return wait(9e9) end
+    end
+    if typeof(v) == "table" and rawget(v,"Remote") then
+        v.Remote.Name = v.Name
+    end
+end
+local oldnamecall; oldnamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod();
+  
+    if (method == "Kick" or method == "kick") and self == game.Players.LocalPlayer then
+        return;
+    end
+  
+    return oldnamecall(self, unpack(args))
+end)
+for i = 1, 25 do -- inf jump bypass
+    events.StartFastRespawn:FireServer()
+    functions.CompleteFastRespawn:FireServer()
+    wait()
+end
+game.CollectionService:AddTag(game:GetService("Workspace").Map,'CAMERA_COLLISION_IGNORE_LIST')
+game.CollectionService:AddTag(game:GetService("Workspace").Map,'RANGED_CASTER_IGNORE_LIST')
+local LocalPlayer = game.Players.LocalPlayer
+local ARROW
+local shot = false
+local arrowsshooted = 0
+local Players = game.Players
+local mouse = LocalPlayer:GetMouse()
+local function getClosestToMouse() -- got this from cheese bcuz im too lazy again and yes he got from devforum
+    local player, nearestDistance = nil, math.huge*9e9
+    for i,v in pairs(Players:GetPlayers()) do
+        if v ~= Players.LocalPlayer and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 and v.Character:FindFirstChild("HumanoidRootPart") then
+            local root, visible = workspace.CurrentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
+            if visible then
+                local distance = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(root.X, root.Y)).Magnitude
+
+                if distance < nearestDistance then
+                    nearestDistance = distance
+                    player = v
+                end
+            end
+        end
+    end
+    return player
+end
+for i,v in pairs(getgc(true)) do
+    if typeof(v) == 'table' and rawget(v,'maxSpread') then
+        v.maxSpread = 0
+        --v.staminaAddition = 100
+        v.recoilYMin = 0
+        v.recoilZMin = 0
+        v.recoilXMin = 0
+        v.recoilYMax = 0
+        v.recoilZMax = 0
+        v.recoilXMax = 0      
+        --v.fireMode = 'auto'
+        v.gravity = Vector3.new(0,0,0)
+        --v.speed = 500
+        v.maxDistance = 999999
+        v.startShootingAfterCharge = true
+        table.foreach(v,print)
+    end
+end
+workspace.EffectsJunk.ChildAdded:Connect(function(p)
+    task.wait() -- yields to prevent some shit lol!
+    if LocalPlayer.Character:FindFirstChildOfClass("Tool") == nil then
+        shot = false
+        return
+    end
+    local Tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+    if Tool:FindFirstChild("ClientAmmo") == nil then
+        shot = false
+        return
+    end
+    if (shot and p:IsA("MeshPart") and p:FindFirstChild("Tip") ~= nil) then
+        ARROW = p
+        Instance.new("SelectionBox",p).Adornee = p
+        shot = false
+    end
+end)
+
+for i,v in pairs(getgc(true)) do
+    if typeof(v) == "table" and rawget(v,"shoot") then
+        local Old = v.shoot
+        v.shoot = function(tbl)
+            shot = true
+            arrowsshooted = tbl.shotIdx
+            return Old(tbl)
+        end
+    end
+    
+    if typeof(v) == "table" and rawget(v,"calculateFireDirection") then
+        old = v.calculateFireDirection
+        v.calculateFireDirection = function(p3,p4,p5,p6)
+            local Tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+            if Tool:FindFirstChild("ClientAmmo") == nil then
+                return old(p3,p4,p5,p6)
+            end
+            if shot then
+                local closest = getClosestToMouse()
+                -- looked into goofy ah script made by cheese and then just cnp'd the prediction (doesnt help tbh)
+                local Prediction = closest.Character.Head.CFrame + (closest.Character.Head.Velocity * 0.19 + Vector3.new(0, .1, 0))
+                return (CFrame.lookAt(Tool.Contents.Handle.FirePoint.WorldCFrame.Position, Prediction.Position)).LookVector * 30;
+            end
+            return old(p3,p4,p5,p6)
+        end
+    end
+end
+
+firehit = function(character,arrow)
+    local fakepos = character.Head.Position + Vector3.new(math.random(1,5),math.random(1,5),math.random(1,5))
+    local args = {
+        [1] = LocalPlayer.Character:FindFirstChildOfClass("Tool"),
+        [2] = character.Head,
+        [3] = fakepos,
+        [4] = character.Head.CFrame:ToObjectSpace(CFrame.new(fakepos)),
+        [5] = fakepos * Vector3.new(math.random(1,5),math.random(1,5),math.random(1,5)),
+        [6] = tostring(arrowsshooted)
+    }
+    game:GetService("ReplicatedStorage").Communication.Events.RangedHit:FireServer(unpack(args))
+end
+local bruh = Instance.new("SelectionBox",workspace)
+bruh.Color3 = Color3.fromRGB(163, 61, 54)
+while wait() do
+    pcall(function()
+        local Tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+        if Tool:FindFirstChild("ClientAmmo") == nil then
+            return
+        end
+        local closest = getClosestToMouse()
+        if closest then
+            bruh.Adornee = closest.Character
+        end
+        if ARROW then
+            if closest then
+                if (ARROW.Position - closest.Character.HumanoidRootPart.Position).Magnitude <= 15 then
+                    firehit(closest.Character,ARROW)
+                    ARROW = nil
+                    shot = false
+                end
+            end
+        end
+        
+        if LocalPlayer.Character then
+            if LocalPlayer.Character:FindFirstChild('Longbow') then
+                for i,v in pairs(getconnections(Tool.ChargeProgressClient:GetPropertyChangedSignal("Value"))) do
+                    v:Disable()
+                end            
+                Tool.ChargeProgressClient.Value = 1
+            end
+        end
+    end)
+end
