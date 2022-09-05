@@ -286,30 +286,6 @@ end
 FLYING = false
 iyflyspeed = 1
 vehicleflyspeed = 1
--- DEVFORUM GETCLOSEST (i love this one, i use it almost on all of my scripts)
-local function GetClosest(Distance)
-    local Character = LocalPlayer.Character
-    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-    if not (Character or HumanoidRootPart) then
-        return
-    end
-
-    local TargetDistance = Distance
-    local Target
-
-    for i, v in ipairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-            local TargetHRP = v.Character.HumanoidRootPart
-            local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
-            if mag < TargetDistance then
-                TargetDistance = mag
-                Target = v
-            end
-        end
-    end
-
-    return Target
-end
 -- inf fly i modified it a bit
 function sFLY(vfly, ragdoll, platform)
     if flyKeyDown or flyKeyUp then
@@ -469,6 +445,11 @@ local tabs = {
 function parry()
     game:GetService("ReplicatedStorage").Communication.Events.Parry:FireServer()
 end
+
+function getChance(v) -- from cheese
+    local chance = math.floor(Random.new().NextNumber(Random.new(),0,1) * 100) / 100
+    return chance <= math.floor(v) / 100
+end
 -- Not my config
 do
     local _menu = tabs[5].new_section("menu") -->> Simple config system
@@ -516,16 +497,39 @@ do
         end
     )
     configs.element("Toggle", "kill say")
-    local oldscore = LocalPlayer.leaderstats.Score.Value
-    LocalPlayer.leaderstats.Score.Changed:Connect(
-        function()
-            if menu.values[5].menu.configs["kill say"].Toggle then
-                game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync(
-                    killsays[math.random(1, #killsays)]
-                ) -- By cheese
+    configs.element("Button","clear local appearance", nil, function()
+        LocalPlayer:ClearCharacterAppearance()
+    end)
+    configs.element("Button","load chat bypass", nil, function()
+        local newT = tick()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/SussyImposterRed/Scripts/main/chatbypass'))()
+        Notification:Notify(
+            {Title = "Nofitication", Description = "Loaded Chat Bypass from github in " .. tick() - newT .. "s (seconds)"},
+            {OutlineColor = Color3.fromRGB(80, 80, 80), Time = 5, Type = "default"}
+        )
+    end)
+    configs.element("Button","unload chat bypass", nil, function()
+        game:GetService("TextChatService").OnIncomingMessage = function(L)end
+    end)
+    for i,v in pairs(getgc(true)) do
+        if typeof(v) == 'table' then
+            if rawget(v,'removeKillFeedIdx') then
+                oldrender = v.render
+                v.render = function(gg)
+                    if gg.props then
+                        local whoDied = gg.props.killfeedItemInfo.playerThatDied
+                        local whoKilled = gg.props.killfeedItemInfo.playerThatKilled
+                        if (menu.values[5].menu.configs["kill say"].Toggle and tostring(whoKilled) == LocalPlayer.Name and tostring(whoDied) ~= LocalPlayer.Name) then
+                            game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync(
+                                tostring(whoDied)..", "..killsays[math.random(1, #killsays)]
+                            )
+                        end
+                    end
+                    return oldrender(gg)
+                end
             end
         end
-    )
+    end
 
     local function update_cfgs()
         all_cfgs = listfiles("novasaves\\")
@@ -551,7 +555,12 @@ do
     local combat = rage.new_sector("combat")
     local Autos = rage.new_sector("Autos", "Right")
     local Misc = rage.new_sector("Misc", "Right")
-    local Spins = rage.new_sector("Spins")
+    local Spins = rage.new_sector("Spins","Right")
+    local parrying = false
+    local PTBL = {}
+    for i,v in pairs(Players:GetPlayers()) do
+        table.insert(PTBL,v.Name)
+    end
     Misc.element("Toggle", "BHop")
     Autos.element("Toggle", "Auto Equip")
     Autos.element("Toggle", "Auto Revive")
@@ -560,6 +569,8 @@ do
     combat.element("Slider", "Kill Aura Distance", {default = {min = 0, max = 12, default = 12}})
     combat.element("Toggle", "Custom Kill Aura Distance")
     combat.element("Slider", "Custom Distance", {default = {min = 0, max = 1000, default = 600}})
+    combat.element("Toggle", "Whitelist Friends")
+    combat.element("Combo", "Whitelist Players",{options = PTBL})
     combat.element("Toggle", "Teleport Behind (for kill aura)")
     combat.element("Slider", "Teleport Distance", {default = {min = 0, max = 5, default = 5}})
     combat.element("Toggle", "Stomp Aura")
@@ -571,70 +582,121 @@ do
     Autos.element("Toggle", "Auto Parry")
     Autos.element("Slider", "Auto Parry Distance", {default = {min = 0, max = 25, default = 10}})
     Autos.element("Slider", "Auto Parry Chance", {default = {min = 0, max = 100, default = 100}})
-    --Autos.element("Slider", "Anti Parry", {default = {min = 0, max = 100, default = 100}}) -- doesnt work because im not adding it yet
-    task.spawn( -- MODIFIED AUTO PARRY (from v3rm thanks to https://v3rmillion.net/showthread.php?tid=1129784)
-        -- i did some coding tho its kinda different because it doesnt check for animations but it gets all animations
-        function()
-            function added(p)
-                function balls(c)
-                    local Humanoid = c:WaitForChild "Humanoid"
-                    if Humanoid then
-                        Humanoid.AnimationPlayed:Connect(
-                            function(anim)
-                                for i, v in pairs(weapon_anims) do
-                                    if
-                                        menu.values[1].rage.Autos["Auto Parry"].Toggle and
-                                            anim.Animation.AnimationId == v
-                                     then
-                                        if menu.values[1].rage.Autos["Auto Parry Chance"].Slider >= 90 then
-                                            if
-                                                (LocalPlayer.Character ~= nil and
-                                                    LocalPlayer.Character:FindFirstChild("Head") ~= nil and
-                                                    p.Character:FindFirstChild("Head") ~= nil)
-                                             then
-                                                local mag =
-                                                    (p.Character.Head.Position - LocalPlayer.Character.Head.Position).Magnitude
-                                                if mag < menu.values[1].rage.Autos["Auto Parry Distance"].Slider then
-                                                    parry()
-                                                end
-                                            end
-                                        else
-                                            local chance = math.random(1, 90)
-                                            if chance >= menu.values[1].rage.Autos["Auto Parry Chance"].Slider then
-                                                if
-                                                    (LocalPlayer.Character ~= nil and
-                                                        LocalPlayer.Character:FindFirstChild("Head") ~= nil and
-                                                        p.Character:FindFirstChild("Head") ~= nil)
-                                                 then
-                                                    local mag =
-                                                        (p.Character.Head.Position - LocalPlayer.Character.Head.Position).Magnitude
-                                                    if mag < menu.values[1].rage.Autos["Auto Parry Distance"].Slider then
-                                                        parry()
-                                                    end
-                                                end
-                                            end
-                                        end
+    Autos.element("Toggle", "Anti Parry")
+    Autos.element("Button", "Fix Anti Parry (if u cant damage)",nil,function()
+        parrying = false
+    end)
+    -- DEVFORUM GETCLOSEST (i love this one, i use it almost on all of my scripts)
+    local function GetClosest(Distance)
+        local Character = LocalPlayer.Character
+        local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+        if not (Character or HumanoidRootPart) then
+            return
+        end
+
+        local TargetDistance = Distance
+        local Target
+
+        for i, v in ipairs(Players:GetPlayers()) do
+            if (v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and not table.find(menu.values[1].rage.combat["Whitelist Players"].Combo,v.Name) and not v:IsFriendsWith(LocalPlayer.UserId)) then
+                local TargetHRP = v.Character.HumanoidRootPart
+                local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
+                if mag < TargetDistance then
+                    TargetDistance = mag
+                    Target = v
+                end
+            end
+        end
+
+        return Target
+    end
+    task.spawn(function()
+        function updatePlrList()
+            local NewPTBL = {}
+            for i,v in pairs(Players:GetPlayers()) do
+                table.insert(NewPTBL,v.Name)
+            end
+            
+            if #NewPTBL ~= 1 then
+                menu.values[1].rage.combat["Whitelist Players"].Combo:set_value(NewPTBL,false)
+            end
+        end
+        
+        while true do
+            pcall(updatePlrList)
+            wait(1)
+        end
+    end)
+    task.spawn(function()
+        local Sounds = {
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+        }
+        
+        workspace.PlayerCharacters.DescendantAdded:Connect(function(e)
+            if (e:IsA("Sound") and e.Parent.Name == "Hitbox") then
+                task.spawn(function()
+                    for i,v in pairs(Sounds) do
+                        if e.Parent.Parent.Parent.Parent.Name == LocalPlayer.Name then
+                            if menu.values[1].rage.combat["Kill Aura"].Toggle then
+                                if e.Name == v then
+                                    spawn(function()
+                                        print('destroying')
+                                        e:Destroy()
+                                    end)
+                                end
+                            end
+                            break
+                        end
+                        if e.Name == v and e.Parent.Parent.Parent.Parent.Name ~= LocalPlayer.Name then
+                            local Character = LocalPlayer.Character
+                            if (Character and Character:FindFirstChild("HumanoidRootPart")) then
+                                local distance = (Character.HumanoidRootPart.Position-e.Parent.Position).Magnitude
+                                if menu.values[1].rage.Autos["Auto Parry Chance"].Slider >= 90 then
+                                    if distance <= menu.values[1].rage.Autos["Auto Parry Distance"].Slider then 
+                                        parry()
+                                    end
+                                elseif getChance(menu.values[1].rage.Autos["Auto Parry Chance"].Slider) then
+                                    if distance <= menu.values[1].rage.Autos["Auto Parry Distance"].Slider then 
+                                        parry()
                                     end
                                 end
                             end
-                        )
+                            break
+                        end
+                    end
+                end)
+            end
+            pcall(function()
+                if (e:IsA("Sound") and e.SoundId == "rbxassetid://211059855") then
+                    if e.Parent.Parent.Name ~= LocalPlayer.Name then
+                        local p = (e.Parent and e.Parent)
+                        if (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then
+                            local distance = (LocalPlayer.Character.HumanoidRootPart.Position-p.Position).Magnitude
+                            if (distance <= 10 and menu.values[1].rage.Autos["Anti Parry"].Toggle) then
+                                parrying = true
+                                task.spawn(function()
+                                    while p.Transparency ~= 1 do
+                                        task.wait()
+                                    end
+                                    task.wait(.1)
+                                    parrying = false
+                                end)
+                            end
+                        end
                     end
                 end
-                if p.Character then
-                    balls(p.Character)
-                end
-                p.CharacterAdded:Connect(balls)
-            end
-
-            for i, v in pairs(Players:GetPlayers()) do
-                if v ~= LocalPlayer then
-                    added(v)
-                end
-            end
-
-            Players.PlayerAdded:Connect(added)
-        end
-    )
+            end)
+        end)
+    end)
     task.spawn(
         function()
             while task.wait() do
@@ -937,6 +999,15 @@ do
             end
         end
     )
+
+    local old
+    old = hookmetamethod(game, "__namecall", function(self, ...)
+        local args = {...}
+        if not checkcaller() and self == events.MeleeDamage and getnamecallmethod() == "FireServer" and parrying == true then
+            return
+        end 
+        return old(self, ...)
+    end)
 end
 
 -- not my esp :Skull:
@@ -1120,24 +1191,10 @@ do
     }
     local misc1 = tabs[4].new_section("misc")
     local misc2 = tabs[4].new_section("misc2")
-    local customchat = tabs[4].new_section("custom chat")
     local miscsector = misc2.new_sector("misc")
-    local cchat = customchat.new_sector("Fun")
-    local stuff = menu.values[4]["custom chat"].Fun
+    --local stuff = menu.values[4]["custom chat"].Fun
     local player = misc1.new_sector("player")
     local utility = misc1.new_sector("utility")
-    cchat.element("Toggle", "Custom Chat")
-    cchat.element("TextBox", "Chat Title (can be slurs, 150k char limit)")
-    cchat.element("Dropdown", "Chat Title Font", {options = fonts})
-    cchat.element("TextBox", "Chat Title Color")
-    cchat.element("TextBox", "Chat Title Size")
-    cchat.element("TextBox", "Custom Username")
-    cchat.element("Dropdown", "Custom Username Font", {options = fonts})
-    cchat.element("TextBox", "Custom Username Color")
-    cchat.element("TextBox", "Custom Username Size")
-    cchat.element("Dropdown", "Text Font", {options = fonts})
-    cchat.element("TextBox", "Text Color")
-    cchat.element("TextBox", "Text Size")
     miscsector.element(
         "Button",
         "No Identity fling",
@@ -1205,53 +1262,6 @@ do
     player.element("Slider", "Power", {default = {min = 0, max = 500, default = 150}})
     Noclipping = game:GetService "RunService".Stepped:Connect(NoclipLoop)
     local Airdrops = game:GetService("Workspace").Airdrops
-    task.spawn(
-        function()
-            while wait(5) do
-                if stuff["Custom Chat"].Toggle then
-                    game:GetService("TextChatService").OnIncomingMessage = function(Inst)
-                        if Inst.TextSource.UserId == LocalPlayer.UserId then
-                            local msg = Inst.Text
-                            Inst.PrefixText =
-                                "<font face='" ..
-                                stuff["Chat Title Font"].Dropdown ..
-                                    "'><font size='" ..
-                                        stuff["Chat Title Size"].Text ..
-                                            "'><font color='" ..
-                                                stuff["Chat Title Color"].Text ..
-                                                    "'>" ..
-                                                        stuff["Chat Title (can be slurs, 150k char limit)"].Text ..
-                                                            "</font></font></font> <font face = '" ..
-                                                                stuff["Custom Username Font"].Dropdown ..
-                                                                    "'><font size='" ..
-                                                                        stuff["Custom Username Size"].Text ..
-                                                                            "'><font color='" ..
-                                                                                stuff["Custom Username Color"].Text ..
-                                                                                    "'>" ..
-                                                                                        stuff["Custom Username"].Text ..
-                                                                                            "</font></font></font>"
-                            --if Inst.Text:find("#") then
-                            Inst.Text =
-                                "<font face='" ..
-                                stuff["Text Font"].Dropdown ..
-                                    "'><font size='" ..
-                                        stuff["Text Size"].Text ..
-                                            "'><font color='" ..
-                                                stuff["Text Color"].Text .. "'>" .. msg .. "</font></font></font>"
-                        --end
-                        end
-                    end
-                else
-                    game:GetService("TextChatService").OnIncomingMessage = function(Inst)
-                        if Inst.TextSource.UserId == LocalPlayer.UserId then
-                            Inst.PrefixText = LocalPlayer.Name
-                            Inst.Text = Inst.Text
-                        end
-                    end
-                end
-            end
-        end
-    )
     task.spawn(
         function()
             Airdrops.ChildAdded:Connect(
