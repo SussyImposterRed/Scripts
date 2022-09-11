@@ -1,0 +1,54 @@
+-- Simple Networking
+
+local remotes = {}
+local functions = {}
+local Network = {}
+local function checkParent(P)
+    if P.Name == "Functions" then
+        return 'RF'
+    elseif P.Name == "Events" then
+        return 'RE'
+    end
+end
+for i,v in pairs(getgc(true)) do
+    if typeof(v) == "table" and rawget(v,"Remote") then
+        local Parent = checkParent(v.Remote.Parent)
+        if Parent == "RF" then
+            functions[v.Name] = v.Remote
+        elseif Parent == "RE" then
+            remotes[v.Name] = v.Remote
+        end
+    end
+end
+
+function Network.fireserver(name,args)
+    local Args = (args and true or false)
+    if Args then
+        if remotes[name] then
+            if typeof(args) == "table" then
+                remotes[name]:FireServer(unpack(args))
+            else
+                remotes[name]:FireServer(args)
+            end
+        end
+    else
+        if remotes[name] then
+            remotes[name]:FireServer()
+        end
+    end
+end
+
+function Network.invokeserver(name,args)
+    local Args = (args and true or false)
+    if Args then
+        if functions[name] then
+            functions[name]:FireServer(unpack(args))
+        end
+    else
+        if functions[name] then
+            functions[name]:FireServer()
+        end
+    end
+end
+
+return Network
