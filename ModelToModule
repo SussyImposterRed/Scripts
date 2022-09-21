@@ -98,7 +98,7 @@ function PropertiesAPI:GetProperties(ClassName : String)
 end
 
 if not PropertiesAPI.Dump then
-	PropertiesAPI.Dump = HttpService:JSONDecode(HttpService:GetAsync(DumpURL))
+	PropertiesAPI.Dump = HttpService:JSONDecode(game:HttpGet(DumpURL))
 end
 
 
