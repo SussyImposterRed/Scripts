@@ -691,6 +691,72 @@ do
             end
         end)
     end)
+    game:GetService'RunService'.Heartbeat:Connect(function()
+        pcall(function()
+        local Closest
+        Closest = GetClosest(menu.values[1].rage.combat["Custom Distance"].Slider)
+        if not Closest then return end
+        local Weapon
+        for i, v in pairs(LocalPlayer.Character:GetChildren()) do
+            if v:IsA("Tool") then
+                if v:FindFirstChild("Hitboxes") ~= nil then
+                    Weapon = v
+                end
+            end
+        end
+        if not Weapon then
+        else
+            if menu.values[1].rage.combat["Custom Kill Aura Distance"].Toggle then
+                for i, v in pairs(Weapon:GetDescendants()) do
+                    if v:IsA "BasePart" then
+                        v.CFrame = Closest.Character.HumanoidRootPart.CFrame
+                        v.CanCollide = false
+                        v.Massless = true
+                        if v:FindFirstChild "BodyVelocity" == nil then
+                            local boopyve = Instance.new("BodyVelocity")
+                            boopyve.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                            boopyve.P = math.huge
+                            boopyve.Velocity = Vector3.new(0, 0, 0)
+                            boopyve.Parent = v
+                        end
+                    end
+                end
+                if v:IsA("Motor6D") then
+                    if v.Parent.Name == "Motor6Ds" then
+                        v:Destroy()
+                    end
+                end
+            end
+        end
+        
+        local Stomp = LocalPlayer.Character.Stomp
+        
+        if not Stomp then
+        else
+            if menu.values[1].rage.combat["Custom Stomp Aura Distance"].Toggle then
+                for i, v in pairs(Stomp:GetDescendants()) do
+                    if v:IsA "BasePart" then
+                        v.CFrame = Closest.Character.HumanoidRootPart.CFrame
+                        v.CanCollide = false
+                        v.Massless = true
+                        if v:FindFirstChild "BodyVelocity" == nil then
+                            local boopyve = Instance.new("BodyVelocity")
+                            boopyve.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                            boopyve.P = math.huge
+                            boopyve.Velocity = Vector3.new(0, 0, 0)
+                            boopyve.Parent = v
+                        end
+                    end
+                end
+                if v:IsA("Motor6D") then
+                    if v.Parent.Name == "Motor6Ds" then
+                        v:Destroy()
+                    end
+                end
+            end
+        end
+        end)
+    end)
     task.spawn(
         function()
             while task.wait() do
