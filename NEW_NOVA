@@ -775,30 +775,6 @@ do
                                     end
                                     if not Weapon then
                                     else
-                                        if menu.values[1].rage.combat["Custom Kill Aura Distance"].Toggle then
-                                            for i, v in pairs(Weapon:GetDescendants()) do
-                                                if v:IsA "BasePart" then
-                                                    v.CFrame = Closest.Character.HumanoidRootPart.CFrame
-                                                    v.Velocity = Vector3.new(100000, 100000, 100000)
-                                                    v.CanCollide = false
-                                                    v.Massless = true
-                                                    --v.Anchored = true
-                                                    if v:FindFirstChild "BodyVelocity" == nil then
-                                                        local boopyve = Instance.new("BodyVelocity")
-                                                        boopyve.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                                                        boopyve.P = math.huge
-                                                        boopyve.Velocity = Vector3.new(100000, 100000, 100000)
-                                                        boopyve.Parent = v
-                                                    end
-                                                end
-                                                if v:IsA("Motor6D") then
-                                                    if v.Parent.Name == "Motor6Ds" then
-                                                        v:Destroy()
-                                                    end
-                                                end
-                                            end
-                                        end
-
                                         local rayOrigin = LocalPlayer.Character.HumanoidRootPart.Position
                                         local rayDirection = Vector3.new(0, 0, 5)
                                         local raycastParams = RaycastParams.new()
@@ -866,32 +842,6 @@ do
                                     local Weapon = LocalPlayer.Character.Stomp
                                     if not Weapon then
                                     else
-                                        if Closest.Character.Humanoid.Health <= 15 then
-                                            if menu.values[1].rage.combat["Custom Stomp Aura Distance"].Toggle then
-                                                for i, v in pairs(Weapon:GetDescendants()) do
-                                                    if v:IsA "BasePart" then
-                                                        v.CFrame = Closest.Character.HumanoidRootPart.CFrame
-                                                        v.Velocity = Vector3.new(100000,100000,100000)
-                                                        v.CanCollide = false
-                                                        v.Massless = true
-                                                        --v.Anchored = true
-                                                        if v:FindFirstChild "BodyVelocity" == nil then
-                                                            local boopyve = Instance.new("BodyVelocity")
-                                                            boopyve.MaxForce =
-                                                                Vector3.new(math.huge, math.huge, math.huge)
-                                                            boopyve.P = math.huge
-                                                            boopyve.Velocity = Vector3.new(100000,100000,100000)
-                                                            boopyve.Parent = v
-                                                        end
-                                                    end
-                                                    if v:IsA("Motor6D") then
-                                                        if v.Parent.Name == "Motor6Ds" then
-                                                            v:Destroy()
-                                                        end
-                                                    end
-                                                end
-                                            end
-
                                             local rayOrigin = LocalPlayer.Character.HumanoidRootPart.Position
                                             local rayDirection = Vector3.new(0, 0, 5)
                                             local raycastParams = RaycastParams.new()
