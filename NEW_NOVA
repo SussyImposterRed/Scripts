@@ -577,9 +577,9 @@ do
     combat.element("Slider", "Stomp Aura Distance", {default = {min = 0, max = 25, default = 25}})
     combat.element("Toggle", "Custom Stomp Aura Distance")
     combat.element("Slider", "Custom Stomp Distance", {default = {min = 0, max = 1000, default = 600}})
-    combat.element("Toggle", "Fake Swing")
-    combat.element("Combo", "Fake Swing Type",{options = {"Sounds","Animations"}})
-    combat.element("Slider","Fake Swing Speed", {default = {min = 1, max = 5, default = 1}})
+    Misc.element("Toggle", "Fake Swing")
+    Misc.element("Combo", "Fake Swing Type",{options = {"Sounds","Animations"}})
+    Misc.element("Slider","Fake Swing Speed", {default = {min = 1, max = 5, default = 1}})
     Spins.element("Toggle", "Spin")
     Spins.element("Slider", "Spin Power", {default = {min = 0, max = 50, default = 50}})
     Autos.element("Toggle", "Auto Parry")
@@ -1009,7 +1009,7 @@ do
         local AnimationPlaying = false
         local GCTable = getgc(true) -- so i dont have to getgc everytime
         while task.wait do
-            if menu.values[1].rage.combat["Fake Swing"].Toggle then
+            if menu.values[1].rage.Misc["Fake Swing"].Toggle then
                 pcall(function()
                     local Weapon
                     for i, v in pairs(LocalPlayer.Character:GetChildren()) do
@@ -1020,7 +1020,7 @@ do
                         end
                     end
                     if Weapon then
-                        if table.find(menu.values[1].rage.combat["Fake Swing Type"].Combo, "Sounds") then
+                        if table.find(menu.values[1].rage.Misc["Fake Swing Type"].Combo, "Sounds") then
                             task.spawn(function()
                                 if not Swinged then
                                     Swinged = true
@@ -1035,7 +1035,7 @@ do
                                 end
                             end)
                         end   
-                        if table.find(menu.values[1].rage.combat["Fake Swing Type"].Combo, "Animations") then
+                        if table.find(menu.values[1].rage.Misc["Fake Swing Type"].Combo, "Animations") then
                             local Animation
                             for i,v in pairs(GCTable) do
                                 if typeof(v) == "table" and rawget(v,"slashMetadata") and rawget(v,"displayName") then
@@ -1057,7 +1057,7 @@ do
                                     task.spawn(function()
                                         AnimationPlaying = true
                                         local Anim = Humanoid:LoadAnimation(Animation)
-                                        Anim:Play(nil,1,menu.values[1].rage.combat["Fake Swing Speed"].Slider)
+                                        Anim:Play(nil,1,menu.values[1].rage.Misc["Fake Swing Speed"].Slider)
                                         Anim.Stopped:Wait()
                                         task.wait(.1)
                                         AnimationPlaying = false
