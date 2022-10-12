@@ -555,8 +555,6 @@ do
     local combat = rage.new_sector("combat")
     local Autos = rage.new_sector("Autos", "Right")
     local Misc = rage.new_sector("Misc", "Right")
-    local Spins = rage.new_sector("Spins","Right")
-    local parrying = false
     local PTBL = {}
     for i,v in pairs(Players:GetPlayers()) do
         table.insert(PTBL,v.Name)
@@ -580,15 +578,12 @@ do
     Misc.element("Toggle", "Fake Swing")
     Misc.element("Combo", "Fake Swing Type",{options = {"Sounds","Animations"}})
     Misc.element("Slider","Fake Swing Speed", {default = {min = 1, max = 5, default = 1}})
-    Spins.element("Toggle", "Spin")
-    Spins.element("Slider", "Spin Power", {default = {min = 0, max = 50, default = 50}})
+    Misc.element("Toggle", "Spin")
+    Misc.element("Slider", "Spin Power", {default = {min = 0, max = 50, default = 50}})
     Autos.element("Toggle", "Auto Parry")
     Autos.element("Slider", "Auto Parry Distance", {default = {min = 0, max = 25, default = 10}})
     Autos.element("Slider", "Auto Parry Chance", {default = {min = 0, max = 100, default = 100}})
     Autos.element("Toggle", "Anti Parry")
-    Autos.element("Button", "Fix Anti Parry (if u cant damage)",nil,function()
-        parrying = false
-    end)
     -- DEVFORUM GETCLOSEST (i love this one, i use it almost on all of my scripts)
     local function GetClosest(Distance)
         local Character = LocalPlayer.Character
@@ -645,21 +640,37 @@ do
         }
         
         workspace.PlayerCharacters.DescendantAdded:Connect(function(e)
-            if (e:IsA("Sound") and e.Parent.Name == "Hitbox") then
-                task.spawn(function()
-                    for i,v in pairs(Sounds) do
-                        if e.Parent.Parent.Parent.Parent.Name == LocalPlayer.Name then
-                            if menu.values[1].rage.combat["Kill Aura"].Toggle then
-                                if e.Name == v then
-                                    spawn(function()
-                                        print('destroying')
-                                        e:Destroy()
+            pcall(function()
+                if (e:IsA("Sound") and e.SoundId == "rbxassetid://211059855") then
+                    if e.Parent.Parent.Name ~= LocalPlayer.Name then
+                        local p = (e.Parent and e.Parent)
+                        if (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then
+                            local distance = (LocalPlayer.Character.HumanoidRootPart.Position-p.Position).Magnitude
+                            if (distance <= 25 and menu.values[1].rage.Autos["Anti Parry"].Toggle) then
+                                local Weapon
+                                for i, v in pairs(LocalPlayer.Character:GetChildren()) do
+                                    if v:IsA("Tool") then
+                                        if v:FindFirstChild("Hitboxes") ~= nil then
+                                            Weapon = v
+                                        end
+                                    end
+                                end
+                                if Weapon then
+                                    task.spawn(function()
+                                        LocalPlayer.Character.Humanoid:UnequipTools()
+                                        p:GetPropertyChangedSignal'Transparency':wait()
+                                        LocalPlayer.Character.Humanoid:EquipTool(Weapon)
                                     end)
                                 end
                             end
-                            break
                         end
-                        if e.Name == v and e.Parent.Parent.Parent.Parent.Name ~= LocalPlayer.Name then
+                    end
+                end
+            end)
+            if (e:IsA("Sound") and e.Parent.Name == "Hitbox") then
+                task.spawn(function()
+                    for i,v in pairs(Sounds) do
+                        if (e.Name == v and e.Parent.Parent.Parent.Parent.Name ~= LocalPlayer.Name and menu.values[1].rage.Autos["Auto Parry"].Toggle) then
                             local Character = LocalPlayer.Character
                             if (Character and Character:FindFirstChild("HumanoidRootPart")) then
                                 local distance = (Character.HumanoidRootPart.Position-e.Parent.Position).Magnitude
@@ -678,26 +689,6 @@ do
                     end
                 end)
             end
-            pcall(function()
-                if (e:IsA("Sound") and e.SoundId == "rbxassetid://211059855") then
-                    if e.Parent.Parent.Name ~= LocalPlayer.Name then
-                        local p = (e.Parent and e.Parent)
-                        if (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then
-                            local distance = (LocalPlayer.Character.HumanoidRootPart.Position-p.Position).Magnitude
-                            if (distance <= 10 and menu.values[1].rage.Autos["Anti Parry"].Toggle) then
-                                parrying = true
-                                task.spawn(function()
-                                    while p.Transparency ~= 1 do
-                                        task.wait()
-                                    end
-                                    task.wait(.1)
-                                    parrying = false
-                                end)
-                            end
-                        end
-                    end
-                end
-            end)
         end)
     end)
     task.spawn(
@@ -958,7 +949,7 @@ do
             while task.wait() do
                 pcall(
                     function() -- originally from outliers old source but i removed it and wrote a new one it kinda looks like the same but its a different one
-                        if menu.values[1].rage.Spins["Spin"].Toggle then
+                        if menu.values[1].rage.Misc["Spin"].Toggle then
                             if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("spin") == nil then
                                 local Spin = Instance.new("BodyAngularVelocity")
                                 Spin.Name = "spin"
@@ -973,7 +964,7 @@ do
                             else
                                 if LocalPlayer.Character.HumanoidRootPart:FindFirstChild("spin") ~= nil then
                                     LocalPlayer.Character.HumanoidRootPart.spin.AngularVelocity =
-                                        Vector3.new(0, menu.values[1].rage.Spins["Spin Power"].Slider, 0)
+                                        Vector3.new(0, menu.values[1].rage.Misc["Spin Power"].Slider, 0)
                                 end
                             end
                         else
@@ -1070,15 +1061,6 @@ do
             end
             task.wait()
         end
-    end)
-
-    local old
-    old = hookmetamethod(game, "__namecall", function(self, ...)
-        local args = {...}
-        if not checkcaller() and self == events.MeleeDamage and getnamecallmethod() == "FireServer" and parrying == true then
-            return
-        end 
-        return old(self, ...)
     end)
 end
 
@@ -1549,48 +1531,48 @@ do
             local whataretheargs = {...}
 
             if
-                not checkcaller() and self.Name == "GotHitRE" and
+                (not checkcaller() and self.Name == "GotHitRE" and
                     menu.values[4].misc.utility["No Utility Damage (expect bombs)"].Toggle and
-                    howcalledomg == "FireServer"
+                    howcalledomg == "FireServer")
              then
                 return wait(9e9)
             end
             if
-                not checkcaller() and self.Name == "RagdollRemoteEvent" and
+                (not checkcaller() and self.Name == "RagdollRemoteEvent" and
                     menu.values[4].misc.player["No Ragdoll"].Toggle and
-                    howcalledomg == "FireServer"
+                    howcalledomg == "FireServer")
              then
                 return wait(9e9)
             end
             if
-                not checkcaller() and self.Name == "StartFallDamage" or
-                    self.Name == "TakeFallDamage" and menu.values[4].misc.player["No Fall Damage"].Toggle and
-                        howcalledomg == "FireServer"
+                (not checkcaller() and menu.values[4].misc.player["No Fall Damage"].Toggle and
+                    self.Name == "TakeFallDamage" and
+                        howcalledomg == "FireServer")
              then
                 return wait(9e9)
             end
             if
-                not checkcaller() and self.Name == "UpdateIsCrouching" and menu.values[4].misc2.misc["Hide Name"].Toggle and
-                    howcalledomg == "FireServer"
+                (not checkcaller() and self.Name == "UpdateIsCrouching" and menu.values[4].misc2.misc["Hide Name"].Toggle and
+                    howcalledomg == "FireServer")
              then
                 return
             elseif
-                not checkcaller() and self.Name == "UpdateIsCrouching" and
-                    not menu.values[4].misc2.misc["Hide Name"].Toggle
+                (not checkcaller() and self.Name == "UpdateIsCrouching" and
+                    not menu.values[4].misc2.misc["Hide Name"].Toggle)
              then
                 return newindex(self, ...)
             end
 
             if
-                not checkcaller() and self.Name == "UpdateIsParkouring" and
+                (not checkcaller() and self.Name == "UpdateIsParkouring" and
                     menu.values[4].misc.player["Walk On Air (Q,E)"].Toggle and
-                    howcalledomg == "FireServer"
+                    howcalledomg == "FireServer")
              then
                 return
             elseif
-                not checkcaller() and self.Name == "UpdateIsParkouring" and
+                (not checkcaller() and self.Name == "UpdateIsParkouring" and
                     not menu.values[4].misc.player["Walk On Air (Q,E)"].Toggle and
-                    howcalledomg == "FireServer"
+                    howcalledomg == "FireServer")
              then
                 return newindex(self, ...)
             end
