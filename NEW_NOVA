@@ -692,7 +692,7 @@ do
         end)
     end)
     game:GetService'RunService'.Heartbeat:Connect(function()
-        pcall(function()
+        --pcall(function()
         local Closest
         Closest = GetClosest(menu.values[1].rage.combat["Custom Distance"].Slider)
         if not Closest then return end
@@ -712,11 +712,19 @@ do
                         v.CFrame = Closest.Character.HumanoidRootPart.CFrame
                         v.CanCollide = false
                         v.Massless = true
+                        if not v:FindFirstChild'body' then
+                            local b = Instance.new("BodyVelocity")
+                            b.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+                            b.P = 1250
+                            b.Velocity = Vector3.new(1000000,1000000,1000000)
+                            b.Name = "body"
+                            b.Parent = v
+                        end
                     end
-                end
-                if v:IsA("Motor6D") then
-                    if v.Parent.Name == "Motor6Ds" then
-                        v:Destroy()
+                    if v:IsA("Motor6D") then
+                        if v.Parent.Name == "Motor6Ds" then
+                            v:Destroy()
+                        end
                     end
                 end
             end
@@ -732,16 +740,24 @@ do
                         v.CFrame = Closest.Character.HumanoidRootPart.CFrame
                         v.CanCollide = false
                         v.Massless = true
+                        if not v:FindFirstChild'body' then
+                            local b = Instance.new("BodyVelocity")
+                            b.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+                            b.P = 1250
+                            b.Velocity = Vector3.new(1000000,1000000,1000000)
+                            b.Name = "body"
+                            b.Parent = v
+                        end
                     end
-                end
-                if v:IsA("Motor6D") then
-                    if v.Parent.Name == "Motor6Ds" then
-                        v:Destroy()
+                    if v:IsA("Motor6D") then
+                        if v.Parent.Name == "Motor6Ds" then
+                            v:Destroy()
+                        end
                     end
                 end
             end
         end
-        end)
+        --end)
     end)
     task.spawn(
         function()
@@ -808,14 +824,6 @@ do
                                         end
                                     end
                                 end
-                            elseif Closest == nil then
-                                for i, v in pairs(Weapon:GetDescendants()) do
-                                    if v:IsA "BasePart" then
-                                        v.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-                                        v.Velocity = Vector3.new(100000,100000,100000)
-                                        v.CanCollide = false
-                                    end
-                                end
                             end
                         end
                     end
@@ -872,14 +880,6 @@ do
 
                                             events.MeleeDamage:FireServer(unpack(args))
                                         end
-                                    end
-                                end
-                            elseif Closest == nil then
-                                for i, v in pairs(Weapon:GetDescendants()) do
-                                    if v:IsA "BasePart" then
-                                        v.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-                                        v.Velocity = Vector3.new(100000,100000,100000)
-                                        v.CanCollide = false
                                     end
                                 end
                             end
