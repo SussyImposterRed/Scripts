@@ -712,13 +712,6 @@ do
                         v.CFrame = Closest.Character.HumanoidRootPart.CFrame
                         v.CanCollide = false
                         v.Massless = true
-                        if v:FindFirstChild "BodyVelocity" == nil then
-                            local boopyve = Instance.new("BodyVelocity")
-                            boopyve.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                            boopyve.P = math.huge
-                            boopyve.Velocity = Vector3.new(0, 0, 0)
-                            boopyve.Parent = v
-                        end
                     end
                 end
                 if v:IsA("Motor6D") then
@@ -739,13 +732,6 @@ do
                         v.CFrame = Closest.Character.HumanoidRootPart.CFrame
                         v.CanCollide = false
                         v.Massless = true
-                        if v:FindFirstChild "BodyVelocity" == nil then
-                            local boopyve = Instance.new("BodyVelocity")
-                            boopyve.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                            boopyve.P = math.huge
-                            boopyve.Velocity = Vector3.new(0, 0, 0)
-                            boopyve.Parent = v
-                        end
                     end
                 end
                 if v:IsA("Motor6D") then
