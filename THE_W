@@ -306,6 +306,7 @@ windows[5]:Label("Mr. Baller#8461 aka len - scripting",Color3.fromRGB(255,255,25
 windows[5]:Label("Intrer#0421 - ui",Color3.fromRGB(255,255,255))
 windows[5]:Label("monke game - it teached me how to mess with fe gun kit",Color3.fromRGB(255,255,255))
 windows[5]:Label("P To Close UI",Color3.fromRGB(255,255,255))
+windows[5]:Label("https://discord.gg/theballers",Color3.fromRGB(255,255,255))
 
 local hook
 local Shooting = false
