@@ -1,0 +1,401 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/miroeramaa/TurtleLib/main/TurtleUiLib.lua"))()
+local plr = game.Players.LocalPlayer
+if not library then return end
+library:Keybind("P")
+local windows = {
+    library:Window("Main"),
+    library:Window("Gun Mods"),
+    library:Window("Building"),
+    library:Window("ESP"),
+    library:Window("Credits")
+}
+
+local toggles = {
+    infammo = false,
+    infrange = false,
+    oneshot = false,
+    nospread = false,
+    norecoil = false,
+    auto = false,
+    instantreload = false,
+    instantequip = false,
+    baller = false,
+    autobuild = false,
+    autodestroy = false,
+    checkPlacer = false,
+    upgrade = false,
+    esp = false,
+    mod = false,
+    ragdoll = false,
+    silentaim = false,
+    showbeam = false,
+    fly = false
+}
+
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local Camera = workspace.CurrentCamera
+
+-- not mine
+local function GetClosestPlayer()
+	local Closest = {nil, nil}
+	local MousePos = Vector2.new(Mouse.X, Mouse.Y)
+	for _, Player in pairs(game.Players:GetPlayers()) do
+		if Player == game.Players.LocalPlayer then continue end
+		local Character = Player.Character
+		if Character then
+			local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+			if HumanoidRootPart then
+				local vector, onScreen = Camera:WorldToScreenPoint(HumanoidRootPart.Position)
+				if onScreen then
+					local Distance = (MousePos - Vector2.new(vector.X, vector.Y)).Magnitude
+					if Closest[1] == nil then Closest = {Distance, Player} continue end
+					if  Distance < Closest[1] then
+						Closest = {Distance, Player}
+					end
+				end
+			end
+		end
+	end
+	return Closest
+end
+-- below this line is my coding
+
+local currentDistance = 12
+local sDistance = 50
+local flySpeed = 3
+local espColor = Color3.fromRGB(255,255,255)
+
+local checkPlacer = function(block)
+    if toggles.checkPlacer then
+        return block.Placer.Value == game.Players.LocalPlayer.Name and true or false
+    else
+        return true
+    end
+end
+
+local checkIsPlot = function(plot)
+    local isPlot = false
+    if plot:FindFirstChild("HumanoidRootPart") and plot:FindFirstChild("Head") then
+        if plot:FindFirstChild("Owner") and not game.Players:GetPlayerFromCharacter(plot) then
+            isPlot = true
+        end
+    end
+    return isPlot
+end
+
+local functions = {
+    build = function()
+        for i,v in pairs(workspace:GetChildren()) do
+            if (v.Name == "Block") then
+                if v:FindFirstChild("PromptAttachment") then
+                    if (plr.Character.HumanoidRootPart.Position - v.Position).Magnitude <= currentDistance then
+                        local placer = checkPlacer(v)
+                        local Prompt = v.PromptAttachment:FindFirstChild("ProximityPrompt")
+                        if (placer and Prompt and Prompt.Enabled == true) then
+                            fireproximityprompt(Prompt,5,false)
+                        end
+                    end
+                end
+            end
+        end
+    end,
+    destroy = function()
+        for i,v in pairs(workspace:GetChildren()) do
+            if (v.Name == "Block") then
+                if (plr.Character.HumanoidRootPart.Position - v.Position).Magnitude <= currentDistance then
+                    if v:FindFirstChild("ClickDetector") then
+                        fireclickdetector(v.ClickDetector)
+                    end
+                end
+            end
+        end
+    end,
+    instantUpgrade = function()
+        for i,v in pairs(workspace:GetChildren()) do
+            if (v:IsA('Model') and checkIsPlot(v)) then
+                if (plr.Character.HumanoidRootPart.Position - v.HumanoidRootPart.Position).Magnitude <= currentDistance then
+                    for i2,v2 in pairs(v:GetDescendants()) do
+                        if (v2:IsA("ProximityPrompt") and v2.Enabled == false) then
+                            v2.Enabled = true
+                        end
+                    end
+                else
+                    for i2,v2 in pairs(v:GetDescendants()) do
+                        if (v2:IsA("ProximityPrompt") and v2.Enabled == true) then
+                            v2.Enabled = false
+                        end
+                    end
+                end
+            end
+        end
+    end,
+    gunmod = function()
+        for i,v in pairs(plr.Character:GetChildren()) do
+            if (v:IsA("Tool") and v:FindFirstChild('Setting')) then
+                local Module = require(v.Setting)
+                if toggles.infammo then
+                    Module.AmmoPerMag = math.huge
+                    Module.Ammo = math.huge
+                    Module.MaxAmmo = math.huge
+                    Module.LimitedAmmoEnabled = false
+                end
+                if toggles.oneshot then
+                    Module.BaseDamage = 9e9
+                end
+                if toggles.auto then
+                    Module.Auto = true
+                end
+                if toggles.nospread then
+                    if not toggles.baller then
+                        Module.Spread = 0
+                    end
+                end
+                if toggles.norecoil then
+                    Module.Recoil = 0
+                end
+                if toggles.instantreload then
+                    Module.ReloadTime = 0
+                end
+                if toggles.instantequip then
+                    Module.EquipTime = 0
+                end
+            end
+        end
+    end,
+    closest = function()
+        local closestz = GetClosestPlayer()
+        if closestz then
+            if closestz[1] >= sDistance then return end
+            local player = closestz[2]
+            if (player.Character and player.Character:FindFirstChild("Humanoid")) then
+                local Module
+                local Gun
+                for i,v in pairs(plr.Character:GetChildren()) do
+                    if (v:IsA("Tool") and v:FindFirstChild('Setting')) then
+                        Module = require(v.Setting)
+                        Gun = v
+                    end
+                end
+                if not Module then return end
+                if not Gun then return end
+                local ohTable1 = Module
+                local ohInstance2 = Gun
+                local ohInstance3 = plr
+                local ohInstance4 = player.Character.Humanoid
+                local ohInstance5 = player.Character.HumanoidRootPart
+                local ohTable6 = {
+	                [1] = 9e9,
+	                [2] = 5,
+	                [3] = true,
+	                [4] = 96.09584045410156,
+	                [5] = true,
+	                [6] = 500,
+	                [7] = 20
+                }
+                local ohTable7 = {
+	                [1] = 0.5,
+	                [2] = 0,
+	                [3] = false,
+	                [4] = false,
+	                [5] = Gun.GunScript_Server.IgniteScript,
+	                [6] = Gun.GunScript_Server.IcifyScript,
+	                [7] = 100,
+	                [8] = 100
+                }
+                local ohTable8 = {
+	                [1] = false,
+	                [2] = 5,
+	                [3] = 3
+                }
+                local ohInstance9 = player.Character.Head
+                local ohTable10 = {
+	                [1] = false,
+	                [2] = {
+		                [1] = 1930359546
+	                },
+	                [3] = 1,
+	                [4] = 1.5,
+	                [5] = 1,
+	                [6] = Gun.GunScript_Local.GoreEffect,
+	                [7] = 50
+                }
+                game:GetService("ReplicatedStorage").Remotes.InflictTarget:InvokeServer(ohTable1, ohInstance2, ohInstance3, ohInstance4, ohInstance5, ohTable6, ohTable7, ohTable8, ohInstance9, ohTable10)
+                if toggles.showbeam then
+                    local Line = Instance.new("Part")
+                    Line.Anchored = true
+                    Line.CanCollide = false
+                    Line.Size = Vector3.new(1,1,(plr.Character.HumanoidRootPart.Position - player.Character.Head.Position).Magnitude)
+                    Line.CFrame = CFrame.new((plr.Character.HumanoidRootPart.Position + player.Character.Head.Position)/2, player.Character.Head.Position)
+                    Line.Transparency = 0.5
+                    Line.Material = "Neon"
+                    Line.BrickColor = BrickColor.new("Lime green")
+                    Line.Parent = workspace
+                    game.Debris:AddItem(Line,.1)
+                end
+            end
+        end
+    end
+}
+windows[1]:Toggle("Silent Aim",false,function(val)
+    toggles.silentaim = val
+end)
+windows[1]:Slider("Silent Aim Distance",0,100,50, function(val)
+    sDistance = val
+end)
+windows[1]:Toggle("Show Beam",false,function(val)
+    toggles.showbeam = val
+end)
+windows[1]:Toggle("No Ragdoll",false,function(val)
+    toggles.ragdoll = val
+end)
+windows[1]:Toggle("Fly (Q: UP, E: DOWN)",false,function(val)
+    toggles.fly = val
+end)
+windows[1]:Slider("Fly Speed",0,20,10, function(val)
+    flySpeed = val
+end)
+windows[2]:Toggle("Gun Mod",false,function(val)
+    toggles.mod = val
+end)
+windows[2]:Toggle("Infinite Ammo",false,function(val)
+    toggles.infammo = val
+end)
+windows[2]:Toggle("One-shot",false,function(val)
+    toggles.oneshot = val
+end)
+windows[2]:Toggle("No Spread",false,function(val)
+    toggles.nospread = val
+end)
+windows[2]:Toggle("No Recoil",false,function(val)
+    toggles.norecoil = val
+end)
+windows[2]:Toggle("Auto",false,function(val)
+    toggles.auto = val
+end)
+windows[2]:Toggle("Instant Reload",false,function(val)
+    toggles.instantreload = val
+end)
+windows[2]:Toggle("Instant Equip",false,function(val)
+    toggles.instantequip = val
+end)
+windows[3]:Toggle("Auto Build",false,function(val)
+    toggles.autobuild = val
+end)
+windows[3]:Toggle("Auto Destroy",false,function(val)
+    toggles.autodestroy = val
+end)
+windows[3]:Toggle("Check Placer",false,function(val)
+    toggles.checkPlacer = val
+end)
+windows[3]:Slider("Distance",0,25,20, function(val)
+    currentDistance = val
+end)
+windows[3]:Toggle("Instant Upgrade",false,function(val)
+    toggles.upgrade = val
+end)
+windows[4]:Toggle("ESP",false,function(val)
+    toggles.esp = val
+end)
+windows[4]:ColorPicker("ESP Color", Color3.fromRGB(255, 255, 255), function(color)
+    espColor = color
+end)
+windows[5]:Button("Rejoin",function()
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
+end)
+windows[5]:Label("Mr. Baller#8461 aka len - scripting",Color3.fromRGB(255,255,255))
+windows[5]:Label("Intrer#0421 - ui",Color3.fromRGB(255,255,255))
+windows[5]:Label("monke game - it teached me how to mess with fe gun kit",Color3.fromRGB(255,255,255))
+windows[5]:Label("P To Close UI",Color3.fromRGB(255,255,255))
+
+local hook
+local Shooting = false
+
+hook = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    
+    if toggles.ragdoll then
+        if not checkcaller() and self.Name == "Ragdoll" and method == "FireServer" then
+            return
+        end
+    end
+    if toggles.silentaim then
+        if not checkcaller() and self.Name == "VisualizeMuzzle" and method == "FireServer" then
+            Shooting = true
+        end
+    end
+
+    return hook(self, unpack(args))
+end)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+    for i,v in pairs(game.Players:GetPlayers()) do
+        if (v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart")) then
+            if toggles.esp then
+                if not v.Character:FindFirstChild("Highlight") then
+                    local h = Instance.new("Highlight")
+                    h.Adornee = v.Character
+                    h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    h.Enabled = true
+                    h.FillTransparency = 1
+                    h.Parent = v.Character
+                else
+                    local Highlight = v.Character.Highlight
+                    Highlight.Enabled = true
+                    Highlight.OutlineColor = espColor
+                end
+            else
+                if v.Character:FindFirstChild("Highlight") then
+                    v.Character.Highlight.Enabled = false
+                end
+            end
+        end
+    end
+end)
+local UIS = game:GetService("UserInputService")
+while task.wait() do
+    pcall(function()
+        game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack,true)
+        if (plr.Character and plr.Character:FindFirstChild"HumanoidRootPart") then
+            if toggles.fly then
+                if not plr.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
+                    local bv = Instance.new('BodyVelocity')
+                    bv.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+                    bv.P = 1250
+                    bv.Velocity = Vector3.new(0,0,0)
+                    bv.Parent = plr.Character.HumanoidRootPart
+                else
+                    local bv = plr.Character.HumanoidRootPart:FindFirstChild("BodyVelocity")
+                    bv.Velocity = plr.Character.Humanoid.MoveDirection * (flySpeed*10)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.Q) then
+                    plr.Character.HumanoidRootPart.CFrame *= CFrame.new(0,0.09,0)
+                end
+                if UIS:IsKeyDown(Enum.KeyCode.E) then
+                    plr.Character.HumanoidRootPart.CFrame *= CFrame.new(0,-0.09,0)
+                end
+            else
+                if plr.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
+                    local bv = plr.Character.HumanoidRootPart:FindFirstChild("BodyVelocity")
+                    bv:Destroy()
+                end
+            end
+            if toggles.autobuild then
+                functions.build()
+            end
+            if toggles.autodestroy then
+                functions.destroy()
+            end
+            if toggles.upgrade then
+                functions.instantUpgrade()
+            end
+            if toggles.mod then
+                functions.gunmod()
+            end
+            if (toggles.silentaim and Shooting) then
+                functions.closest()
+                Shooting = false
+            end
+        end
+    end)
+end
