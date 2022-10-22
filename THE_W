@@ -3,11 +3,11 @@ local plr = game.Players.LocalPlayer
 if not library then return end
 library:Keybind("P")
 local windows = {
-    library:Window("Ball Hub - Main"),
-    library:Window("Ball Hub - Gun Mods"),
-    library:Window("Ball Hub - Building"),
-    library:Window("Ball Hub - ESP"),
-    library:Window("Ball Hub - Credits")
+    library:Window("Baller - Main"),
+    library:Window("Baller - Gun Mods"),
+    library:Window("Baller - Building"),
+    library:Window("Baller - ESP"),
+    library:Window("Baller - Credits")
 }
 
 local toggles = {
@@ -29,7 +29,8 @@ local toggles = {
     ragdoll = false,
     silentaim = false,
     showbeam = false,
-    fly = false
+    fly = false,
+    customSpawn = false
 }
 
 local Mouse = game.Players.LocalPlayer:GetMouse()
@@ -63,6 +64,7 @@ end
 local currentDistance = 12
 local sDistance = 50
 local flySpeed = 3
+local Location
 local espColor = Color3.fromRGB(255,255,255)
 
 local checkPlacer = function(block)
@@ -254,6 +256,14 @@ end)
 windows[1]:Slider("Fly Speed",0,20,10, function(val)
     flySpeed = val
 end)
+windows[1]:Toggle("Custom Spawn",false,function(val)
+    toggles.customSpawn = val
+end)
+windows[1]:Button("Set Spawn Location",function()
+    if (plr.Character and plr.Character:FindFirstChild('HumanoidRootPart')) then
+        Location = plr.Character:FindFirstChild('HumanoidRootPart').CFrame
+    end
+end)
 windows[2]:Toggle("Gun Mod",false,function(val)
     toggles.mod = val
 end)
@@ -327,6 +337,17 @@ hook = hookmetamethod(game, "__namecall", function(self, ...)
     end
 
     return hook(self, unpack(args))
+end)
+
+plr.CharacterAdded:Connect(function(c)
+    if toggles.customSpawn then
+        if Location then
+            task.spawn(function()
+                repeat task.wait() until c.PrimaryPart
+                c:SetPrimaryPartCFrame(Location)
+            end)
+        end
+    end
 end)
 
 game:GetService("RunService").Heartbeat:Connect(function()
