@@ -121,12 +121,6 @@ local functions = {
                             v2.Enabled = true
                         end
                     end
-                else
-                    for i2,v2 in pairs(v:GetDescendants()) do
-                        if (v2:IsA("ProximityPrompt") and v2.Enabled == true) then
-                            v2.Enabled = false
-                        end
-                    end
                 end
             end
         end
