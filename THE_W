@@ -30,7 +30,8 @@ local toggles = {
     silentaim = false,
     showbeam = false,
     fly = false,
-    customSpawn = false
+    customSpawn = false,
+    autofire = false
 }
 
 local Mouse = game.Players.LocalPlayer:GetMouse()
@@ -45,7 +46,8 @@ local function GetClosestPlayer()
 		local Character = Player.Character
 		if Character then
 			local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-			if HumanoidRootPart then
+			local Humanoid = Character:FindFirstChild("Humanoid")
+			if (HumanoidRootPart and Humanoid and Humanoid.Health ~= 0) then
 				local vector, onScreen = Camera:WorldToScreenPoint(HumanoidRootPart.Position)
 				if onScreen then
 					local Distance = (MousePos - Vector2.new(vector.X, vector.Y)).Magnitude
@@ -59,6 +61,29 @@ local function GetClosestPlayer()
 	end
 	return Closest
 end
+
+local function GetClosest()
+    local Character = plr.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not (Character or HumanoidRootPart) then return end
+
+    local TargetDistance = math.huge
+    local Target
+
+    for i,v in ipairs(game.Players:GetPlayers()) do
+        if (v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("Humanoid").Health ~= 0) then
+            local TargetHRP = v.Character.HumanoidRootPart
+            local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
+            if mag < TargetDistance then
+                TargetDistance = mag
+                Target = v
+            end
+        end
+    end
+
+    return Target
+end
+
 -- below this line is my coding
 
 local currentDistance = 12
@@ -230,6 +255,78 @@ local functions = {
                 end
             end
         end
+    end,
+    killNear = function()
+        local closestz = GetClosest()
+        if closestz then
+            local player = closestz
+            if (player.Character and player.Character:FindFirstChild("Humanoid")) then
+                local Module
+                local Gun
+                for i,v in pairs(plr.Character:GetChildren()) do
+                    if (v:IsA("Tool") and v:FindFirstChild('Setting')) then
+                        Module = require(v.Setting)
+                        Gun = v
+                    end
+                end
+                if not Module then return end
+                if not Gun then return end
+                local ohTable1 = Module
+                local ohInstance2 = Gun
+                local ohInstance3 = plr
+                local ohInstance4 = player.Character.Humanoid
+                local ohInstance5 = player.Character.HumanoidRootPart
+                local ohTable6 = {
+	                [1] = 9e9,
+	                [2] = 5,
+	                [3] = true,
+	                [4] = 96.09584045410156,
+	                [5] = true,
+	                [6] = 500,
+	                [7] = 20
+                }
+                local ohTable7 = {
+	                [1] = 0.5,
+	                [2] = 0,
+	                [3] = false,
+	                [4] = false,
+	                [5] = Gun.GunScript_Server.IgniteScript,
+	                [6] = Gun.GunScript_Server.IcifyScript,
+	                [7] = 100,
+	                [8] = 100
+                }
+                local ohTable8 = {
+	                [1] = false,
+	                [2] = 5,
+	                [3] = 3
+                }
+                local ohInstance9 = player.Character.Head
+                local ohTable10 = {
+	                [1] = false,
+	                [2] = {
+		                [1] = 1930359546
+	                },
+	                [3] = 1,
+	                [4] = 1.5,
+	                [5] = 1,
+	                [6] = Gun.GunScript_Local.GoreEffect,
+	                [7] = 50
+                }
+                game:GetService("ReplicatedStorage").Remotes.InflictTarget:InvokeServer(ohTable1, ohInstance2, ohInstance3, ohInstance4, ohInstance5, ohTable6, ohTable7, ohTable8, ohInstance9, ohTable10)
+                if toggles.showbeam then
+                    local Line = Instance.new("Part")
+                    Line.Anchored = true
+                    Line.CanCollide = false
+                    Line.Size = Vector3.new(1,1,(plr.Character.HumanoidRootPart.Position - player.Character.Head.Position).Magnitude)
+                    Line.CFrame = CFrame.new((plr.Character.HumanoidRootPart.Position + player.Character.Head.Position)/2, player.Character.Head.Position)
+                    Line.Transparency = 0.5
+                    Line.Material = "Neon"
+                    Line.BrickColor = BrickColor.new("Lime green")
+                    Line.Parent = workspace
+                    game.Debris:AddItem(Line,.1)
+                end
+            end
+        end
     end
 }
 windows[1]:Toggle("Silent Aim",false,function(val)
@@ -237,6 +334,9 @@ windows[1]:Toggle("Silent Aim",false,function(val)
 end)
 windows[1]:Slider("Silent Aim Distance",0,100,50, function(val)
     sDistance = val
+end)
+windows[1]:Toggle("Auto Kill",false,function(val)
+    toggles.autofire = val
 end)
 windows[1]:Toggle("Show Beam",false,function(val)
     toggles.showbeam = val
@@ -411,6 +511,9 @@ while task.wait() do
             if (toggles.silentaim and Shooting) then
                 functions.closest()
                 Shooting = false
+            end
+            if (toggles.autofire) then
+                functions.killNear()
             end
         end
     end)
