@@ -3,11 +3,11 @@ local plr = game.Players.LocalPlayer
 if not library then return end
 library:Keybind("P")
 local windows = {
-    library:Window("Main"),
-    library:Window("Gun Mods"),
-    library:Window("Building"),
-    library:Window("ESP"),
-    library:Window("Credits")
+    library:Window("Ball Hub - Main"),
+    library:Window("Ball Hub - Gun Mods"),
+    library:Window("Ball Hub - Building"),
+    library:Window("Ball Hub - ESP"),
+    library:Window("Ball Hub - Credits")
 }
 
 local toggles = {
