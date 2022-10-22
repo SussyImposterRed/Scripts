@@ -403,6 +403,9 @@ end)
 windows[4]:ColorPicker("ESP Color", Color3.fromRGB(255, 255, 255), function(color)
     espColor = color
 end)
+windows[5]:Toggle("No Wind Sound",true,function(val)
+    game:GetService("SoundService").wind.Playing = not val
+end)
 windows[5]:Button("Rejoin",function()
     game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
 end)
