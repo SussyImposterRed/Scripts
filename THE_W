@@ -90,6 +90,9 @@ local currentDistance = 12
 local sDistance = 50
 local flySpeed = 3
 local Location
+local AudioId = 2165159082
+local AudioVolume = 5
+local AudioPitch = 1
 local espColor = Color3.fromRGB(255,255,255)
 
 local checkPlacer = function(block)
@@ -326,6 +329,48 @@ local functions = {
 				end
 			end
 		end
+	end,
+	playAudio = function()
+	    local playersc = {}
+        for i,v in pairs(game.Players:GetPlayers()) do
+            table.insert(playersc,v.Character and v.Character or nil)
+        end
+        function e(c)
+            for i,v in pairs(c:GetDescendants()) do
+                if v:IsA("Attachment") then
+                    game:GetService("ReplicatedStorage").Remotes.PlayAudio:FireServer(
+                        {
+                            SoundId = "rbxassetid://"..AudioId, -- audio id
+                            EmitterSize = 1000,
+                            MaxDistance = 900000,
+                            Volume = AudioVolume,
+                            Pitch = AudioPitch,
+                            Muzzle = v,
+                            Echo = false,
+                            Silenced = false
+                        },
+                        {
+                            Enabled = false,
+                            CurrentAmmo = 12,
+                            AmmoPerMag = 12,
+                            SoundId = "rbxassetid://1836685873", -- audio id
+                            EmitterSize = 1000,
+                            MaxDistance = 900000,
+                            Volume = 10,
+                            Pitch = 1,
+                            Muzzle = v
+                        },
+                        true
+                    )
+                    return
+                end
+            end
+        end
+        for i,v in pairs(playersc) do
+            if v~=nil then
+                e(v)
+            end
+        end
 	end
 }
 windows[1]:Toggle("Silent Aim",false,function(val)
@@ -402,9 +447,28 @@ end)
 windows[4]:ColorPicker("ESP Color", Color3.fromRGB(255, 255, 255), function(color)
 	espColor = color
 end)
+windows[5]:Box("Song Id", function(text, focuslost)
+   if (focuslost and tonumber(text)) then
+      AudioId = tonumber(text)
+   end
+end)
+windows[5]:Box("Song Volume", function(text, focuslost)
+   if (focuslost and tonumber(text)) then
+       AudioVolume = tonumber(text)
+   end
+end)
+windows[5]:Box("Song Pitch", function(text, focuslost)
+   if (focuslost and tonumber(text)) then
+       AudioPitch = tonumber(text)
+   end
+end)
+windows[5]:Button("Play Song (may take a few tries)",function()
+    functions.playAudio()
+end)
 windows[5]:Toggle("No Wind Sound",true,function(val)
 	game:GetService("SoundService").wind.Playing = not val
 end)
+game:GetService("SoundService").wind.Playing = false
 windows[5]:Button("Rejoin",function()
 	game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
 end)
