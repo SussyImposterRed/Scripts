@@ -391,10 +391,10 @@ while task.wait() do
                     bv.Velocity = plr.Character.Humanoid.MoveDirection * (flySpeed*10)
                 end
                 if UIS:IsKeyDown(Enum.KeyCode.Q) then
-                    plr.Character.HumanoidRootPart.CFrame *= CFrame.new(0,0.09,0)
+                    plr.Character.HumanoidRootPart.CFrame *= CFrame.new(0,0.1*flySpeed,0)
                 end
                 if UIS:IsKeyDown(Enum.KeyCode.E) then
-                    plr.Character.HumanoidRootPart.CFrame *= CFrame.new(0,-0.09,0)
+                    plr.Character.HumanoidRootPart.CFrame *= CFrame.new(0,-0.1*flySpeed,0)
                 end
             else
                 if plr.Character.HumanoidRootPart:FindFirstChild("BodyVelocity") then
