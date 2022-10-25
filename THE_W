@@ -84,6 +84,34 @@ local function GetClosest()
 	return Target
 end
 
+-- cheese's shit code lol
+local plrTable={}
+for i,v in pairs(game:GetService("Players"):GetPlayers()) do
+	if v and v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+		plrTable[v.Name] = v
+	end
+	v.CharacterAdded:Connect(function()
+		plrTable[v.Name] = v
+	end)
+	v.CharacterRemoving:Connect(function()
+		plrTable[v.Name]:Destroy()
+		plrTable[v.Name] = nil
+	end)
+end
+
+game:GetService("Players").PlayerAdded:Connect(function(v)
+	if v ~= nil and v ~= plr and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+		v.CharacterAdded:Connect(function()
+			plrTable[v.Name] = v
+		end)
+
+		v.CharacterRemoving:Connect(function()
+			plrTable[v.Name]:Destroy()
+			plrTable[v.Name] = nil
+		end)
+	end
+end)
+
 -- below this line is my coding
 
 local currentDistance = 12
@@ -373,6 +401,7 @@ local functions = {
         end
 	end
 }
+
 windows[1]:Toggle("Silent Aim",false,function(val)
 	toggles.silentaim = val
 end)
@@ -402,6 +431,12 @@ windows[1]:Button("Set Spawn Location",function()
 		Location = plr.Character:FindFirstChild('HumanoidRootPart').CFrame
 	end
 end)
+local TPDropdown = windows[1]:Dropdown("Teleport To Person", {}, function(val)
+	plr.Character:SetPrimaryPartCFrame(plrTable[val].Character.HumanoidRootPart.CFrame)
+end)
+for i,v in pairs(plrTable) do
+	TPDropdown:Button(i)
+end
 windows[2]:Toggle("Gun Mod",false,function(val)
 	toggles.mod = val
 end)
