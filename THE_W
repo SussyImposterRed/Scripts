@@ -358,6 +358,65 @@ local functions = {
 			end
 		end
 	end,
+	funny = function(fire,ice)
+	    for i,v in pairs(game.Players:GetPlayers()) do
+			local player = v
+			if (player ~= plr and player.Character and player.Character:FindFirstChild("Humanoid") and player.Character:FindFirstChild("Humanoid").Health ~= 0 and player.Character:FindFirstChild("HumanoidRootPart")) then
+				local Module
+				local Gun
+				for i,v in pairs(plr.Character:GetChildren()) do
+					if (v:IsA("Tool") and v:FindFirstChild('Setting')) then
+						Module = require(v.Setting)
+						Gun = v
+					end
+				end
+				if not Module then return end
+				if not Gun then return end
+				local ohTable1 = Module
+				local ohInstance2 = Gun
+				local ohInstance3 = plr
+				local ohInstance4 = player.Character.Humanoid
+				local ohInstance5 = player.Character.HumanoidRootPart
+				local ohTable6 = {
+					[1] = 5,
+					[2] = 5,
+					[3] = true,
+					[4] = 96.09584045410156,
+					[5] = true,
+					[6] = 500,
+					[7] = 20
+				}
+				local ohTable7 = {
+					[1] = 0.5,
+					[2] = 0,
+					[3] = fire,
+					[4] = ice,
+					[5] = Gun.GunScript_Server.IgniteScript,
+					[6] = Gun.GunScript_Server.IcifyScript,
+					[7] = 100,
+					[8] = 100
+				}
+				local ohTable8 = {
+					[1] = false,
+					[2] = 5,
+					[3] = 3
+				}
+				local ohInstance9 = player.Character.Head
+				local ohTable10 = {
+					[1] = false,
+					[2] = {
+						[1] = 1930359546
+					},
+					[3] = 1,
+					[4] = 1.5,
+					[5] = 1,
+					[6] = Gun.GunScript_Local.GoreEffect,
+					[7] = 50
+				}
+				game:GetService("ReplicatedStorage").Remotes.InflictTarget:InvokeServer(ohTable1, ohInstance2, ohInstance3, ohInstance4, ohInstance5, ohTable6, ohTable7, ohTable8, ohInstance9, ohTable10)
+			end
+		end
+	end,
 	playAudio = function()
 	    local playersc = {}
         for i,v in pairs(game.Players:GetPlayers()) do
@@ -410,6 +469,15 @@ windows[1]:Slider("Silent Aim Distance",0,100,50, function(val)
 end)
 windows[1]:Toggle("Auto Kill",false,function(val)
 	toggles.autofire = val
+end)
+windows[1]:Button("Freeze All",function()
+	functions.funny(false,true)
+end)
+windows[1]:Button("Burn All",function()
+    functions.funny(true,false)
+end)
+windows[1]:Button("Burn & Freeze All",function()
+    functions.funny(true,true)
 end)
 windows[1]:Toggle("Show Beam",false,function(val)
 	toggles.showbeam = val
