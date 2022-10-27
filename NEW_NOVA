@@ -585,6 +585,15 @@ do
     Autos.element("Slider", "Auto Parry Chance", {default = {min = 0, max = 100, default = 100}})
     Autos.element("Toggle", "Anti Parry")
     -- DEVFORUM GETCLOSEST (i love this one, i use it almost on all of my scripts)
+    local function checkFriend(zjxifjw)
+        local playa = zjxifjw
+        if (menu.values[1].rage.combat["Whitelist Friends"].Toggle and playa:IsFriendsWith(LocalPlayer.UserId)) then
+            return true
+        else
+            return false
+        end
+    end
+    
     local function GetClosest(Distance)
         local Character = LocalPlayer.Character
         local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
@@ -596,7 +605,7 @@ do
         local Target
 
         for i, v in ipairs(Players:GetPlayers()) do
-            if (v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and not table.find(menu.values[1].rage.combat["Whitelist Players"].Combo,v.Name) and not v:IsFriendsWith(LocalPlayer.UserId)) then
+            if (v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and not table.find(menu.values[1].rage.combat["Whitelist Players"].Combo,v.Name) and not checkFriend(v)) then
                 local TargetHRP = v.Character.HumanoidRootPart
                 local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
                 if mag < TargetDistance then
