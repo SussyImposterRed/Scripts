@@ -278,8 +278,8 @@ local functions = {
 					Line.CanCollide = false
 					Line.Size = Vector3.new(1,1,(plr.Character.HumanoidRootPart.Position - player.Character.Head.Position).Magnitude)
 					Line.CFrame = CFrame.new((plr.Character.HumanoidRootPart.Position + player.Character.Head.Position)/2, player.Character.Head.Position)
-					Line.Transparency = 0.5
-					Line.Material = "Neon"
+					Line.Transparency = 0
+					Line.Material = "Forcefield"
 					Line.BrickColor = BrickColor.new("Lime green")
 					Line.Parent = workspace
 					game.Debris:AddItem(Line,.1)
@@ -469,6 +469,9 @@ windows[1]:Slider("Silent Aim Distance",0,100,50, function(val)
 end)
 windows[1]:Toggle("Auto Kill",false,function(val)
 	toggles.autofire = val
+end)
+windows[1]:Button("God-Mode",function()
+	game:GetService("ReplicatedStorage").Remotes.falldamage:FireServer(0/0)
 end)
 windows[1]:Button("Freeze All",function()
 	functions.funny(false,true)
